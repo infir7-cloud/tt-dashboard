@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>고수외전 성장 대시보드</title>
-<link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Pretendard:wght=300;400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -124,7 +124,6 @@ canvas{display:block}
 </head>
 <body>
 
-<!-- ── 헤더 ── -->
 <div class="topbar">
   <div class="topbar-inner">
     <div>
@@ -139,11 +138,9 @@ canvas{display:block}
   <span id="statusText">구글 시트에서 데이터 불러오는 중...</span>
 </div>
 
-<!-- ── 메인 ── -->
 <div class="page">
   <div id="mainBody" style="padding:14px 16px 0;display:none">
 
-    <!-- 퍼널 -->
     <div class="funnel">
       <div class="fn-item">
         <div class="fn-icon" style="background:#F3EEFF">📺</div>
@@ -178,7 +175,6 @@ canvas{display:block}
       </div>
     </div>
 
-    <!-- KPI -->
     <div class="kpi-grid">
       <div class="card-sm"><div class="kpi-label">텔레그램 구독자</div><div class="kpi-value" id="kpi1" style="color:#3182F6">—</div><div class="kpi-delta" id="kpi1d"></div></div>
       <div class="card-sm"><div class="kpi-label">카카오 친구</div><div class="kpi-value" id="kpi2" style="color:#F5A623">—</div><div class="kpi-delta" id="kpi2d"></div></div>
@@ -186,7 +182,6 @@ canvas{display:block}
       <div class="card-sm"><div class="kpi-label">이탈률</div><div class="kpi-value" id="kpi4">—</div><div class="kpi-delta" id="kpi4d"></div></div>
     </div>
 
-    <!-- 차트 1: 구독자 추이 -->
     <div class="card">
       <div class="eyebrow">텔레그램 성장 추이</div>
       <div class="card-title">채널 구독자 누적</div>
@@ -194,7 +189,6 @@ canvas{display:block}
       <div style="position:relative;height:190px"><canvas id="tgChart"></canvas></div>
     </div>
 
-    <!-- 차트 2: 론칭 효과 -->
     <div class="card">
       <div class="eyebrow">6/1 카카오채널 론칭 효과</div>
       <div class="card-title">텔레그램 전환 분석</div>
@@ -202,7 +196,6 @@ canvas{display:block}
       <div style="position:relative;height:160px"><canvas id="launchChart"></canvas></div>
     </div>
 
-    <!-- 차트 3: 본방 vs 재방 -->
     <div class="card">
       <div class="eyebrow">방송 효과 분석</div>
       <div class="card-title">본방 vs 재방 일 평균 입장</div>
@@ -210,7 +203,6 @@ canvas{display:block}
       <div style="position:relative;height:150px"><canvas id="bcastChart"></canvas></div>
     </div>
 
-    <!-- 차트 4: 주간 순증 -->
     <div class="card">
       <div class="eyebrow">최근 4주 성장</div>
       <div class="card-title">주간 텔레그램 순증</div>
@@ -218,7 +210,6 @@ canvas{display:block}
       <div style="position:relative;height:150px"><canvas id="weeklyChart"></canvas></div>
     </div>
 
-    <!-- 최근 7일 -->
     <div class="card">
       <div class="eyebrow">최근 7일</div>
       <div class="card-title">일별 현황</div>
@@ -227,19 +218,16 @@ canvas{display:block}
 
   </div>
 
-  <!-- 로딩 -->
   <div id="loadingState" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:14px">
     <div style="width:32px;height:32px;border:3px solid #E8EAED;border-top-color:#3182F6;border-radius:50%;animation:spin 0.8s linear infinite"></div>
     <div style="font-size:14px;color:#6B7684">구글 시트에서 데이터 불러오는 중...</div>
   </div>
 </div>
 
-<!-- ── 관리자 FAB ── -->
 <div class="admin-fab" id="adminFab">
   <button onclick="openAdmin()" title="데이터 관리">⚙️</button>
 </div>
 
-<!-- ── 관리자 패널 오버레이 ── -->
 <div class="admin-overlay" id="adminOverlay" onclick="overlayClick(event)">
   <div class="admin-panel">
     <div class="admin-header">
@@ -253,10 +241,8 @@ canvas{display:block}
     </div>
     <div class="admin-body">
 
-      <!-- 플래시 메시지 -->
       <div id="flashMsg" style="display:none"></div>
 
-      <!-- ── 입력 탭 ── -->
       <div class="tab-pane active" id="tab-input">
         <div id="editBanner" style="display:none;background:#EBF3FE;border-radius:10px;padding:10px 14px;margin-bottom:14px;display:none;justify-content:space-between;align-items:center">
           <span style="font-size:13px;font-weight:700;color:#3182F6" id="editBannerText"></span>
@@ -301,13 +287,11 @@ canvas{display:block}
         <button class="btn btn-blue btn-full" onclick="saveRow()">저장</button>
       </div>
 
-      <!-- ── 목록 탭 ── -->
       <div class="tab-pane" id="tab-list">
         <button class="new-btn" onclick="switchTab('input');cancelEdit()">+ 새 데이터 입력</button>
         <div id="dataList"></div>
       </div>
 
-      <!-- ── 설정 탭 ── -->
       <div class="tab-pane" id="tab-settings">
         <div class="section-hd">채널 · 방송 정보</div>
         <div class="grid2" style="margin-bottom:10px">
@@ -343,10 +327,9 @@ canvas{display:block}
 <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
 
 <script>
-// ── 설정 ──────────────────────────────────────────────────────────
-const GAS_URL = 'https://script.google.com/macros/s/AKfycby-kGUVKj6_XkIZoeXiW9d5V-sz1NZFu1NKJDd9EpdyLKUyPhADOXmm-CtSFdyPRO9Q1A/exec';
-
+// ── 설정 기본값 ──────────────────────────────────────────────────────────
 let CFG = {
+  gasUrl: 'https://script.google.com/macros/s/AKfycby-kGUVKj6_XkIZoeXiW9d5V-sz1NZFu1NKJDd9EpdyLKUyPhADOXmm-CtSFdyPRO9Q1A/exec',
   sheetId: '1QZk5g7GugoW1Sr-Iu-mjNpQeCpDbXpxb4TXOj9AREPc',
   sheetName: '데이터',
   channel: 'SBS Biz',
@@ -357,7 +340,7 @@ let CFG = {
   launch: '2026-06-01',
 };
 
-// ── 로컬 데이터 (구글 시트 로드 실패 시 폴백) ───────────────────
+// ── 로컬 데이터 (구글 시트 로드 실패 시 폴백용 기본 데이터) ───────────────────
 const INIT = [
   {date:'2026-04-01',dow:'수',bcast:'방송없음',g:2463,gin:24,gout:16,ktF:0,ktV:0},
   {date:'2026-04-05',dow:'일',bcast:'고수외전 재방',g:2544,gin:69,gout:15,ktF:0,ktV:0},
@@ -394,7 +377,7 @@ let editDate = null;
 let tapCount = 0, tapTimer = null;
 let cTg, cLaunch, cBcast, cWeekly;
 
-// ── 초기화 ────────────────────────────────────────────────────────
+// ── 데이터 관리 핵심 기능 로직 ───────────────────────────────────
 function loadCfg() {
   try { const s = localStorage.getItem('gosu_cfg'); if(s) CFG = {...CFG, ...JSON.parse(s)}; } catch{}
 }
@@ -404,28 +387,43 @@ function loadLocal() {
 }
 function saveLocal() { localStorage.setItem('gosu_data', JSON.stringify(DATA)); }
 
-// ── Google Apps Script 쓰기 ───────────────────────────────────────
+// ── Google Apps Script 양방향 데이터 연동 (Update) ────────────────
 async function gasUpsert(row) {
+  if(!CFG.gasUrl) return;
   try {
-    await fetch(GAS_URL, {
+    await fetch(CFG.gasUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain' },
       body: JSON.stringify({ action: 'upsert', row }),
       mode: 'no-cors',
     });
-  } catch(e) { console.warn('GAS upsert 실패:', e); }
+  } catch(e) { console.warn('GAS 업데이트 전송 실패:', e); }
 }
 
 async function gasDelete(date) {
+  if(!CFG.gasUrl) return;
   try {
-    await fetch(GAS_URL, {
+    await fetch(CFG.gasUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain' },
       body: JSON.stringify({ action: 'delete', date }),
       mode: 'no-cors',
     });
-  } catch(e) { console.warn('GAS delete 실패:', e); }
+  } catch(e) { console.warn('GAS 삭제 전송 실패:', e); }
 }
+
+async function gasUpdateConfig(configData) {
+  if(!CFG.gasUrl) return;
+  try {
+    await fetch(CFG.gasUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ action: 'updateConfig', config: configData }),
+      mode: 'no-cors',
+    });
+  } catch(e) { console.warn('GAS 프로그램 세팅값 업데이트 실패:', e); }
+}
+
 function sort(arr) { return [...arr].sort((a,b)=>a.date.localeCompare(b.date)); }
 
 // ── 구글 시트 로드 ────────────────────────────────────────────────
@@ -461,14 +459,13 @@ async function init() {
   loadCfg();
   applyCfgToForm();
 
-  // 타이틀 탭 → 관리자 진입
+  // 대시보드 메인 타이틀을 5번 연속 클릭하면 관리자 톱니바퀴가 나타납니다.
   document.getElementById('mainTitle').addEventListener('click', handleTap);
 
   try {
     const rows = await loadSheets();
     if(rows.length) {
       DATA = sort(rows);
-      // 로컬 데이터와 병합 (관리자 입력 분 추가 반영)
       const local = loadLocal();
       local.forEach(lr => {
         if(!DATA.find(r=>r.date===lr.date)) DATA.push(lr);
@@ -487,7 +484,7 @@ async function init() {
   document.getElementById('loadingState').style.display='none';
   document.getElementById('mainBody').style.display='block';
   render();
-  // 5분마다 시트 새로고침
+
   setInterval(async()=>{
     try{const rows=await loadSheets();if(rows.length){DATA=sort(rows);saveLocal();render();}}catch{}
   }, 5*60*1000);
@@ -501,14 +498,12 @@ function setStatus(type, msg) {
   else dot.style.background='#F04452';
 }
 
-// ── 관리자 진입 (제목 5번 탭) ─────────────────────────────────────
 function handleTap() {
   tapCount++;
   if(tapCount>=5) { tapCount=0; clearTimeout(tapTimer); document.getElementById('adminFab').classList.add('visible'); flash('⚙️ 관리자 모드 활성화됨', 'ok', 2000); }
   else { clearTimeout(tapTimer); tapTimer=setTimeout(()=>tapCount=0, 2000); }
 }
 
-// ── 관리자 패널 ───────────────────────────────────────────────────
 function openAdmin() { document.getElementById('adminOverlay').classList.add('open'); renderList(); }
 function closeAdmin() { document.getElementById('adminOverlay').classList.remove('open'); }
 function overlayClick(e) { if(e.target===document.getElementById('adminOverlay')) closeAdmin(); }
@@ -528,7 +523,6 @@ function flash(msg, type, dur=2500) {
   setTimeout(()=>el.style.display='none', dur);
 }
 
-// ── 입력 / 수정 저장 ──────────────────────────────────────────────
 function setToday() {
   const now = new Date();
   document.getElementById('f_date').value = now.toISOString().slice(0,10);
@@ -601,7 +595,6 @@ function deleteRow(date) {
   renderList();
 }
 
-// ── 목록 렌더 ─────────────────────────────────────────────────────
 function renderList() {
   const el = document.getElementById('dataList');
   if(!DATA.length) { el.innerHTML='<div style="text-align:center;padding:20px;color:#ADB5BD">데이터 없음</div>'; return; }
@@ -632,7 +625,6 @@ function renderList() {
   }).join('');
 }
 
-// ── 설정 저장 ─────────────────────────────────────────────────────
 function applyCfgToForm() {
   document.getElementById('s_channel').value = CFG.channel;
   document.getElementById('s_program').value = CFG.program;
@@ -642,8 +634,10 @@ function applyCfgToForm() {
   document.getElementById('s_launch').value = CFG.launch;
   document.getElementById('s_sheetId').value = CFG.sheetId;
   document.getElementById('s_sheetName').value = CFG.sheetName;
-  document.getElementById('s_gasUrl').value = typeof GAS_URL !== 'undefined' ? GAS_URL : '';
+  document.getElementById('s_gasUrl').value = CFG.gasUrl || '';
 }
+
+// [수정 핵심 부분] 설정을 로컬 브라우저와 구글 시트 양쪽에 영구히 덮어씌웁니다.
 function saveSettings() {
   CFG.channel = document.getElementById('s_channel').value;
   CFG.program = document.getElementById('s_program').value;
@@ -653,13 +647,27 @@ function saveSettings() {
   CFG.launch = document.getElementById('s_launch').value;
   CFG.sheetId = document.getElementById('s_sheetId').value;
   CFG.sheetName = document.getElementById('s_sheetName').value;
-  const newGasUrl = document.getElementById('s_gasUrl').value.trim();
-  if(newGasUrl) { try { window.GAS_URL = newGasUrl; } catch{} }
+  CFG.gasUrl = document.getElementById('s_gasUrl').value.trim();
+  
   saveCfg();
   applyCfgToForm();
+  
+  // 구글 시트로 방송 정보 동기화 요청 전송
+  if(CFG.gasUrl) {
+    gasUpdateConfig({
+      channel: CFG.channel,
+      program: CFG.program,
+      freq: CFG.freq,
+      mainDay: CFG.mainDay,
+      rerunDay: CFG.rerunDay,
+      launch: CFG.launch
+    });
+  }
+  
   render();
-  flash('✓ 설정 저장 완료 · 대시보드에 즉시 반영됐습니다.','ok');
+  flash('✓ 설정 및 방송 정보 업데이트 완료!','ok');
 }
+
 function resetData() {
   if(!confirm('로컬 데이터를 초기화할까요?')) return;
   localStorage.removeItem('gosu_data');
@@ -678,7 +686,6 @@ function render() {
   if(!DATA.length) return;
   const last=DATA[DATA.length-1], first=DATA[0];
 
-  // CFG → 대시보드 반영
   document.getElementById('fn-channel').textContent = `${CFG.channel} · ${CFG.program}`;
   document.getElementById('fn-freq').textContent = CFG.freq;
   document.getElementById('fn-schedule').textContent = `매주 ${CFG.mainDay}요일 본방 · ${CFG.rerunDay}요일 재방`;
@@ -690,7 +697,6 @@ function render() {
 
   document.getElementById('lastDate').textContent=last.date;
 
-  // 퍼널
   if(lastKt){
     const d=Math.max(1,Math.round((new Date(lastKt.date)-new Date(CFG.launch))/86400000)+1);
     document.getElementById('ktDays').textContent=d;
@@ -703,7 +709,6 @@ function render() {
   document.getElementById('tgNet').textContent='+'+tgNet.toLocaleString();
   document.getElementById('tgBadge').textContent='+'+tgNet.toLocaleString();
 
-  // KPI
   document.getElementById('kpi1').textContent=last.g.toLocaleString();
   document.getElementById('kpi1d').textContent=`+${tgNet.toLocaleString()} 기간 순증`;
   if(lastKt){const d=Math.max(1,Math.round((new Date(lastKt.date)-new Date(CFG.launch))/86400000)+1);document.getElementById('kpi2').textContent=lastKt.ktF.toLocaleString();document.getElementById('kpi2d').textContent=`론칭 후 ${d}일`;}
@@ -717,19 +722,15 @@ function render() {
   const k4=document.getElementById('kpi4');k4.textContent=rate+'%';k4.style.color=parseFloat(rate)<25?'#00B493':'#F5A623';
   document.getElementById('kpi4d').textContent='이탈 / 입장 비율';
 
-  // 차트1
-  document.getElementById('stats1').innerHTML=stat('현재',last.g.toLocaleString()+'명','#3182F6')+stat('기간 순증','+'+tgNet.toLocaleString()+'명','#00B493');
   if(cTg)cTg.destroy();
   cTg=new Chart(document.getElementById('tgChart'),{type:'line',data:{labels:DATA.map(r=>r.date.slice(5)),datasets:[{data:DATA.map(r=>r.g),borderColor:'#3182F6',backgroundColor:'rgba(49,130,246,.08)',tension:.3,pointRadius:0,borderWidth:2.5,fill:true}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.parsed.y.toLocaleString()+'명'}}},scales:{x:{ticks:{color:TK,font:{size:9},maxTicksLimit:8},grid:{color:GR},border:{color:GR}},y:{ticks:{color:TK,font:{size:9},callback:v=>(v/1000).toFixed(1)+'K'},grid:{color:GR},border:{color:GR}}}}});
 
-  // 차트2
   const pre=DATA.filter(r=>r.date>='2026-05-25'&&r.date<='2026-05-31').reduce((s,r)=>s+r.gin-r.gout,0);
   const post=DATA.filter(r=>r.date>='2026-06-01'&&r.date<='2026-06-07').reduce((s,r)=>s+r.gin-r.gout,0);
   document.getElementById('stats2').innerHTML=stat('론칭 전 1주','+'+pre+'명','#ADB5BD')+stat('론칭 후 1주','+'+post+'명','#00B493')+stat('효과',(post/Math.max(pre,1)).toFixed(1)+'배↑','#3182F6');
   if(cLaunch)cLaunch.destroy();
   cLaunch=new Chart(document.getElementById('launchChart'),{type:'bar',data:{labels:['5/25~5/31 (론칭 전)','6/1~6/7 (론칭 후)'],datasets:[{data:[pre,post],backgroundColor:['#D1D6DC','#00B493'],borderRadius:8,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>'+'+ctx.parsed.y.toLocaleString()+'명'}}},scales:{x:{ticks:{color:'#6B7684',font:{size:11,weight:'600'}},grid:{display:false},border:{color:GR}},y:{ticks:{color:TK,font:{size:9}},grid:{color:GR},border:{color:GR}}}}});
 
-  // 차트3
   const dm={월:[],화:[],수:[],목:[],금:[],토:[],일:[]};
   DATA.forEach(r=>{if(dm[r.dow])dm[r.dow].push(r);});
   const avg=a=>a.length?Math.round(a.reduce((s,r)=>s+r.gin,0)/a.length):0;
@@ -738,14 +739,12 @@ function render() {
   if(cBcast)cBcast.destroy();
   cBcast=new Chart(document.getElementById('bcastChart'),{type:'bar',data:{labels:['월 본방','일 재방','비방송'],datasets:[{data:[mA,sA,oA],backgroundColor:['#3182F6','#00B493','#D1D6DC'],borderRadius:[0,8,8,0],borderSkipped:'left',indexAxis:'y'}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.parsed.x+'명'}}},scales:{x:{ticks:{color:TK,font:{size:9}},grid:{color:GR},border:{color:GR}},y:{ticks:{color:'#6B7684',font:{size:12,weight:'700'}},grid:{display:false},border:{color:GR}}}}});
 
-  // 차트4
   const wm={};DATA.forEach(r=>{const d=new Date(r.date),dy=d.getDay();const m=new Date(d);m.setDate(d.getDate()-(dy===0?6:dy-1));const wk=m.toISOString().slice(0,10);wm[wk]=(wm[wk]||0)+r.gin-r.gout;});
   const wks=Object.keys(wm).sort().slice(-4);const wv=wks.map(k=>wm[k]);
   document.getElementById('stats4').innerHTML=stat('4주 평균','+'+(Math.round(wv.reduce((s,v)=>s+v,0)/4)).toLocaleString()+'명','#00B493')+stat('최근 주',(wv.at(-1)>=0?'+':'')+wv.at(-1).toLocaleString()+'명','#3182F6');
   if(cWeekly)cWeekly.destroy();
   cWeekly=new Chart(document.getElementById('weeklyChart'),{type:'bar',data:{labels:wks.map(k=>k.slice(5)+'~'),datasets:[{data:wv,backgroundColor:wv.map(v=>v>=0?'#00B493':'#F04452'),borderRadius:8,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>(ctx.parsed.y>=0?'+':'')+ctx.parsed.y.toLocaleString()+'명'}}},scales:{x:{ticks:{color:'#6B7684',font:{size:10,weight:'600'}},grid:{display:false},border:{color:GR}},y:{ticks:{color:TK,font:{size:9}},grid:{color:GR},border:{color:GR}}}}});
 
-  // 최근 7일
   document.getElementById('recentList').innerHTML=[...DATA].reverse().slice(0,7).map(r=>{
     const net=r.gin-r.gout;
     const bTag=r.bcast==='방송없음'?'<span style="font-size:11px;color:#ADB5BD">—</span>':r.bcast.includes('본방')?`<span class="bcast-tag t-main">본방 (${CFG.mainDay})</span>`:`<span class="bcast-tag t-re">재방 (${CFG.rerunDay})</span>`;
@@ -760,7 +759,6 @@ function render() {
   }).join('');
 }
 
-// 초기 폼 날짜 세팅 후 실행
 setToday();
 init();
 </script>
