@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>고수외전 주간 업무보고</title>
+<link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#F0F2F5;color:#191F28;font-family:'Pretendard','Apple SD Gothic Neo',sans-serif;min-height:100vh}
+.page{max-width:960px;margin:0 auto;padding-bottom:80px}
+
+/* 공통 */
+.card{background:#fff;border-radius:16px;box-shadow:0 1px 10px rgba(0,0,0,.06);padding:22px;margin-bottom:14px}
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:10px 18px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;border:none;font-family:inherit;transition:all .15s}
+.btn-blue{background:#3182F6;color:#fff}.btn-blue:hover{background:#1A6DEB}
+.btn-ghost{background:#F5F6F8;color:#6B7684}.btn-ghost:hover{background:#E8EAED}
+.btn-full{width:100%;padding:13px}
+input,select,textarea{width:100%;padding:10px 12px;background:#F5F6F8;border:1.5px solid #E8EAED;border-radius:10px;font-size:13px;color:#191F28;outline:none;font-family:inherit;transition:border-color .15s}
+input:focus,select:focus,textarea:focus{border-color:#3182F6}
+textarea{resize:vertical;min-height:70px}
+label{display:block;font-size:11px;font-weight:700;color:#6B7684;margin-bottom:5px}
+.form-row{margin-bottom:12px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.flash{padding:10px 14px;border-radius:10px;font-size:13px;font-weight:700;text-align:center;margin-bottom:12px;display:none}
+.flash.ok{background:#E5F7F3;color:#00B493;display:block}
+.flash.err{background:#FEECEE;color:#F04452;display:block}
+
+/* 헤더 */
+.topbar{background:#fff;border-bottom:1px solid #E8EAED;padding:16px 20px 12px}
+.topbar-inner{display:flex;justify-content:space-between;align-items:flex-end}
+.report-tag{font-size:10px;font-weight:700;color:#ADB5BD;letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px}
+.report-title{font-size:20px;font-weight:800;letter-spacing:-.5px;cursor:default;user-select:none}
+.report-title em{font-style:normal;color:#3182F6}
+.report-meta{text-align:right;font-size:11px;color:#ADB5BD;line-height:2}
+.report-meta b{color:#3182F6;font-weight:700}
+.status-bar{display:flex;align-items:center;gap:8px;padding:9px 20px;font-size:12px;font-weight:600}
+.status-bar.live{background:#EBF3FE;color:#3182F6}
+.status-bar.warn{background:#FFF5E0;color:#F5A623}
+.sd{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.live .sd{background:#00B493;animation:pulse 2s infinite}
+.warn .sd{background:#F5A623}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* 섹션 헤더 */
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.section-badge{display:inline-flex;align-items:center;gap:6px}
+.section-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.section-label{font-size:15px;font-weight:800;letter-spacing:-.3px}
+.section-period{font-size:11px;color:#ADB5BD}
+
+/* 채널 카드 그리드 */
+.channel-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.ch-card{background:#F8F9FB;border-radius:12px;padding:14px}
+.ch-name{font-size:11px;font-weight:700;color:#6B7684;margin-bottom:6px;display:flex;align-items:center;gap:5px}
+.ch-value{font-size:26px;font-weight:800;letter-spacing:-1px;line-height:1;margin-bottom:6px}
+.ch-stats{display:flex;gap:12px;flex-wrap:wrap}
+.ch-stat{display:flex;flex-direction:column}
+.ch-stat-label{font-size:10px;color:#ADB5BD}
+.ch-stat-value{font-size:12px;font-weight:700;margin-top:1px}
+
+/* 3열 채널 */
+.channel-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px}
+
+/* 델타 배지 */
+.db{display:inline-flex;align-items:center;gap:2px;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:800}
+.db-up{background:#E5F7F3;color:#00B493}
+.db-dn{background:#FEECEE;color:#F04452}
+.db-neu{background:#F5F6F8;color:#ADB5BD}
+
+/* 추이 차트 영역 */
+.chart-area{position:relative;height:180px;margin-bottom:16px}
+
+/* 비고란 */
+.memo-wrap{margin-top:4px}
+.memo-label{font-size:11px;font-weight:700;color:#ADB5BD;margin-bottom:6px}
+.memo-box{background:#F8F9FB;border-radius:10px;padding:12px;font-size:13px;color:#191F28;line-height:1.7;min-height:48px;white-space:pre-wrap;word-break:break-all}
+.memo-empty{color:#ADB5BD;font-size:13px}
+
+/* 인포머셜 */
+.info-row{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid #F0F2F5}
+.info-row:last-child{border-bottom:none}
+.info-name{font-size:13px;font-weight:700;width:80px;flex-shrink:0}
+.info-bar-wrap{flex:1;height:8px;background:#F0F2F5;border-radius:4px;overflow:hidden}
+.info-bar{height:100%;border-radius:4px;transition:width .8s ease}
+.info-right{min-width:70px;text-align:right}
+.info-val{font-size:13px;font-weight:800}
+.info-delta{font-size:11px;color:#ADB5BD;margin-top:1px}
+
+/* 관리자 */
+.admin-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;overflow-y:auto}
+.admin-overlay.open{display:flex;align-items:flex-start;justify-content:center;padding:20px}
+.admin-panel{background:#fff;border-radius:20px;width:100%;max-width:560px;margin:auto}
+.admin-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #E8EAED}
+.admin-header-title{font-size:16px;font-weight:800}
+.close-btn{width:32px;height:32px;border-radius:50%;background:#F5F6F8;border:none;cursor:pointer;font-size:20px;display:flex;align-items:center;justify-content:center;color:#6B7684}
+.admin-tabs{display:flex;border-bottom:1px solid #E8EAED}
+.atab{flex:1;padding:12px 0;background:none;border:none;cursor:pointer;font-size:12px;font-weight:700;color:#ADB5BD;font-family:inherit;border-bottom:2.5px solid transparent;transition:all .15s}
+.atab.active{color:#3182F6;border-bottom-color:#3182F6}
+.admin-body{padding:16px;max-height:75vh;overflow-y:auto}
+.tab-pane{display:none}.tab-pane.active{display:block}
+.shd{font-size:12px;font-weight:800;color:#191F28;margin:14px 0 10px;padding-bottom:7px;border-bottom:1px solid #E8EAED}
+.shd:first-child{margin-top:0}
+.data-item{background:#F5F6F8;border-radius:12px;padding:12px;margin-bottom:8px}
+.di-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.di-date{font-size:14px;font-weight:800}
+.di-btns button{padding:4px 10px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;border:none;font-family:inherit;margin-left:5px}
+.di-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;text-align:center}
+.dc-l{font-size:10px;color:#ADB5BD;margin-bottom:1px}
+.dc-v{font-size:12px;font-weight:700}
+.edit-banner{background:#EBF3FE;border-radius:10px;padding:10px 14px;margin-bottom:12px;display:none;justify-content:space-between;align-items:center}
+.edit-banner.show{display:flex}
+.new-btn{width:100%;padding:12px;background:#fff;color:#3182F6;border:1.5px dashed #3182F6;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:10px}
+.new-btn:hover{background:#EBF3FE}
+.info-box-sm{background:#F5F6F8;border-radius:8px;padding:10px 12px;font-size:11px;color:#6B7684;line-height:1.7;margin-bottom:12px}
+.admin-fab{display:none;position:fixed;bottom:24px;right:24px;z-index:50}
+.admin-fab.visible{display:block}
+.admin-fab button{width:52px;height:52px;border-radius:50%;background:#3182F6;color:#fff;border:none;cursor:pointer;font-size:20px;box-shadow:0 4px 14px rgba(49,130,246,.4)}
+.tap-hint{position:fixed;top:60px;left:50%;transform:translateX(-50%);background:rgba(49,130,246,.9);color:#fff;padding:5px 14px;border-radius:20px;font-size:12px;font-weight:700;z-index:200;pointer-events:none;opacity:0;transition:opacity .3s;white-space:nowrap}
+.tap-hint.show{opacity:1}
+canvas{display:block}
+@media(max-width:500px){.channel-grid,.channel-grid-3{grid-template-columns:1fr 1fr}.di-grid{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div>
+      <div class="report-tag">주간 업무보고</div>
+      <div class="report-title" id="mainTitle"><em id="hdr-program">고수외전</em> 채널 현황</div>
+    </div>
+    <div class="report-meta">보고 기간 <b id="periodLabel">—</b><br>기준일 <b id="lastDate">—</b></div>
+  </div>
+</div>
+<div class="status-bar live" id="statusBar">
+  <div class="sd"></div>
+  <span id="statusText">데이터 불러오는 중...</span>
+</div>
+<div class="tap-hint" id="tapHint"></div>
+
+<div class="page">
+<div id="mainBody" style="padding:14px 16px 0;display:none">
+
+  <!-- ━━━ SNS ━━━ -->
+  <div class="card">
+    <div class="section-header">
+      <div class="section-badge">
+        <div class="section-icon" style="background:#FFF5E0">💬</div>
+        <div class="section-label">SNS 채널</div>
+      </div>
+      <div class="section-period" id="sns-period">—</div>
+    </div>
+
+    <!-- 카카오 + 텔레그램 수치 -->
+    <div class="channel-grid">
+      <div class="ch-card">
+        <div class="ch-name"><span>💬</span>카카오채널</div>
+        <div class="ch-value" id="kt-val" style="color:#F5A623">—</div>
+        <div class="ch-stats">
+          <div class="ch-stat"><div class="ch-stat-label">7일 순증</div><div class="ch-stat-value" id="kt-net">—</div></div>
+          <div class="ch-stat"><div class="ch-stat-label">일평균</div><div class="ch-stat-value" id="kt-avg">—</div></div>
+        </div>
+      </div>
+      <div class="ch-card">
+        <div class="ch-name"><span>✈️</span>텔레그램</div>
+        <div class="ch-value" id="tg-val" style="color:#3182F6">—</div>
+        <div class="ch-stats">
+          <div class="ch-stat"><div class="ch-stat-label">7일 순증</div><div class="ch-stat-value" id="tg-net">—</div></div>
+          <div class="ch-stat"><div class="ch-stat-label">이탈률</div><div class="ch-stat-value" id="tg-churn">—</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SNS 7일 추이 차트 -->
+    <div class="chart-area"><canvas id="chartSns"></canvas></div>
+
+    <!-- SNS 비고 -->
+    <div class="memo-wrap">
+      <div class="memo-label">📝 비고</div>
+      <div class="memo-box" id="memo-sns"><span class="memo-empty">관리자에서 비고를 입력하세요</span></div>
+    </div>
+  </div>
+
+  <!-- ━━━ 영상 채널 ━━━ -->
+  <div class="card">
+    <div class="section-header">
+      <div class="section-badge">
+        <div class="section-icon" style="background:#FFE8E8">▶️</div>
+        <div class="section-label">영상 채널</div>
+      </div>
+      <div class="section-period" id="video-period">—</div>
+    </div>
+
+    <div class="channel-grid-3">
+      <div class="ch-card">
+        <div class="ch-name">▶️ 유튜브</div>
+        <div class="ch-value" id="yt-val" style="color:#FF0000">—</div>
+        <div class="ch-stats">
+          <div class="ch-stat"><div class="ch-stat-label">7일 증감</div><div class="ch-stat-value" id="yt-net">—</div></div>
+        </div>
+      </div>
+      <div class="ch-card">
+        <div class="ch-name">🎵 틱톡</div>
+        <div class="ch-value" id="tt-val" style="color:#191F28">—</div>
+        <div class="ch-stats">
+          <div class="ch-stat"><div class="ch-stat-label">7일 증감</div><div class="ch-stat-value" id="tt-net">—</div></div>
+        </div>
+      </div>
+      <div class="ch-card">
+        <div class="ch-name">📺 네이버TV</div>
+        <div class="ch-value" id="ntv-val" style="color:#00C73C">—</div>
+        <div class="ch-stats">
+          <div class="ch-stat"><div class="ch-stat-label">7일 증감</div><div class="ch-stat-value" id="ntv-net">—</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chart-area"><canvas id="chartVideo"></canvas></div>
+
+    <div class="memo-wrap">
+      <div class="memo-label">📝 비고</div>
+      <div class="memo-box" id="memo-video"><span class="memo-empty">관리자에서 비고를 입력하세요</span></div>
+    </div>
+  </div>
+
+  <!-- ━━━ 인포머셜 ━━━ -->
+  <div class="card">
+    <div class="section-header">
+      <div class="section-badge">
+        <div class="section-icon" style="background:#E8F4FF">📰</div>
+        <div class="section-label">인포머셜 광고 유입</div>
+      </div>
+      <div class="section-period" id="info-period">—</div>
+    </div>
+
+    <div id="infoRows"></div>
+
+    <div class="chart-area" style="height:150px;margin-top:14px"><canvas id="chartInfo"></canvas></div>
+
+    <div class="memo-wrap" style="margin-top:14px">
+      <div class="memo-label">📝 비고</div>
+      <div class="memo-box" id="memo-info"><span class="memo-empty">관리자에서 비고를 입력하세요</span></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- 로딩 -->
+<div id="loadingState" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:14px">
+  <div style="width:30px;height:30px;border:3px solid #E8EAED;border-top-color:#3182F6;border-radius:50%;animation:spin .8s linear infinite"></div>
+  <div style="font-size:13px;color:#6B7684">데이터 불러오는 중...</div>
+</div>
+</div>
+
+<!-- FAB -->
+<div class="admin-fab" id="adminFab">
+  <button onclick="openAdmin()">⚙️</button>
+</div>
+
+<!-- 관리자 오버레이 -->
+<div class="admin-overlay" id="adminOverlay" onclick="overlayClick(event)">
+  <div class="admin-panel">
+    <div class="admin-header">
+      <div class="admin-header-title">데이터 관리</div>
+      <button class="close-btn" onclick="closeAdmin()">×</button>
+    </div>
+    <div class="admin-tabs">
+      <button class="atab active" onclick="switchTab('input')">새 입력</button>
+      <button class="atab" onclick="switchTab('list')">목록·수정</button>
+      <button class="atab" onclick="switchTab('memo')">비고 편집</button>
+      <button class="atab" onclick="switchTab('settings')">설정</button>
+    </div>
+    <div class="admin-body">
+      <div class="flash" id="flashMsg"></div>
+
+      <!-- 입력 탭 -->
+      <div class="tab-pane active" id="tab-input">
+        <div class="edit-banner" id="editBanner">
+          <span style="font-size:13px;font-weight:700;color:#3182F6" id="editBannerText"></span>
+          <button onclick="cancelEdit()" style="background:none;border:none;font-size:22px;color:#3182F6;cursor:pointer">×</button>
+        </div>
+        <div class="g3 form-row">
+          <div><label>날짜</label><input type="date" id="f_date"></div>
+          <div><label>요일</label>
+            <select id="f_dow"><option>월</option><option>화</option><option>수</option><option>목</option><option>금</option><option>토</option><option>일</option></select>
+          </div>
+          <div><label>방송여부</label>
+            <select id="f_bcast">
+              <option value="방송없음">방송없음</option>
+              <option value="고수외전 본방">본방(월)</option>
+              <option value="고수외전 재방">재방(화·일)</option>
+            </select>
+          </div>
+        </div>
+        <div style="background:#EBF3FE;border-radius:12px;padding:14px;margin-bottom:10px">
+          <div style="font-size:11px;font-weight:800;color:#3182F6;margin-bottom:10px">💬 SNS 채널</div>
+          <div class="form-row"><label>텔레그램 총 구독자</label><input type="number" id="f_g" placeholder="예: 6596"></div>
+          <div class="g2 form-row" style="margin:0">
+            <div><label>텔레그램 입장</label><input type="number" id="f_gin" placeholder="86"></div>
+            <div><label>텔레그램 이탈</label><input type="number" id="f_gout" placeholder="17"></div>
+          </div>
+          <div class="g2 form-row" style="margin-top:10px;margin-bottom:0">
+            <div><label>카카오 친구수</label><input type="number" id="f_kt" placeholder="6076"></div>
+            <div><label>카카오 조회수</label><input type="number" id="f_ktv" placeholder="3399"></div>
+          </div>
+        </div>
+        <div style="background:#F3EEFF;border-radius:12px;padding:14px;margin-bottom:10px">
+          <div style="font-size:11px;font-weight:800;color:#8B5CF6;margin-bottom:10px">▶️ 영상 채널 구독자</div>
+          <div class="g3">
+            <div><label>유튜브</label><input type="number" id="f_yt" placeholder="0"></div>
+            <div><label>틱톡</label><input type="number" id="f_tt" placeholder="0"></div>
+            <div><label>네이버TV</label><input type="number" id="f_ntv" placeholder="0"></div>
+          </div>
+        </div>
+        <div style="background:#E5F7F3;border-radius:12px;padding:14px;margin-bottom:14px">
+          <div style="font-size:11px;font-weight:800;color:#00B493;margin-bottom:10px">📰 인포머셜 유입</div>
+          <div class="g3">
+            <div><label>아시아경제</label><input type="number" id="f_asia" placeholder="0"></div>
+            <div><label>뉴스핌</label><input type="number" id="f_news" placeholder="0"></div>
+            <div><label>이투데이</label><input type="number" id="f_etoday" placeholder="0"></div>
+          </div>
+        </div>
+        <button class="btn btn-blue btn-full" onclick="saveRow()">저장</button>
+      </div>
+
+      <!-- 목록 탭 -->
+      <div class="tab-pane" id="tab-list">
+        <button class="new-btn" onclick="cancelEdit();switchTab('input')">+ 새 데이터 입력</button>
+        <div id="dataList"></div>
+      </div>
+
+      <!-- 비고 탭 -->
+      <div class="tab-pane" id="tab-memo">
+        <div class="shd">SNS 채널 비고</div>
+        <div class="form-row"><textarea id="m_sns" placeholder="SNS 채널 관련 특이사항, 이슈, 계획 등을 입력하세요"></textarea></div>
+        <div class="shd">영상 채널 비고</div>
+        <div class="form-row"><textarea id="m_video" placeholder="유튜브·틱톡·네이버TV 관련 특이사항을 입력하세요"></textarea></div>
+        <div class="shd">인포머셜 광고 비고</div>
+        <div class="form-row"><textarea id="m_info" placeholder="광고 집행 현황, 유입 분석 등을 입력하세요"></textarea></div>
+        <button class="btn btn-blue btn-full" onclick="saveMemo()">비고 저장</button>
+      </div>
+
+      <!-- 설정 탭 -->
+      <div class="tab-pane" id="tab-settings">
+        <div class="shd">채널 · 방송 정보</div>
+        <div class="g2 form-row">
+          <div><label>채널명</label><input type="text" id="s_channel"></div>
+          <div><label>프로그램명</label><input type="text" id="s_program"></div>
+        </div>
+        <div class="g3 form-row">
+          <div><label>방송 횟수</label><input type="text" id="s_freq"></div>
+          <div><label>본방 요일</label><input type="text" id="s_main"></div>
+          <div><label>재방 요일</label><input type="text" id="s_rerun"></div>
+        </div>
+        <div class="form-row"><label>카카오채널 론칭일</label><input type="date" id="s_launch"></div>
+        <div class="shd">구글 시트 연동</div>
+        <div class="form-row"><label>스프레드시트 ID</label><input type="text" id="s_sheetId"></div>
+        <div class="form-row"><label>시트 탭 이름</label><input type="text" id="s_sheetName"></div>
+        <div class="form-row"><label>Apps Script URL</label><input type="text" id="s_gasUrl"></div>
+        <div class="info-box-sm">설정 저장 시 구글 시트 <b style="color:#191F28">설정</b> 탭에 자동 저장됩니다.</div>
+        <button class="btn btn-blue btn-full" onclick="saveSettings()" style="margin-bottom:8px">설정 저장</button>
+        <button class="btn btn-ghost btn-full" onclick="resetData()">로컬 데이터 초기화</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const DEFAULT_CFG = {
+  channel:'SBS Biz', program:'고수외전', freq:'주 3회',
+  mainDay:'월', rerunDay:'화,일', launch:'2026-06-01',
+  sheetId:'1QZk5g7GugoW1Sr-Iu-mjNpQeCpDbXpxb4TXOj9AREPc',
+  sheetName:'데이터',
+  gasUrl:'https://script.google.com/macros/s/AKfycbzsaon4GipPoXzPCutUTP6_YAcpJL5_1gLhkjde5LNZB5EV7vEbuS_rLXc-_hbysg2p5A/exec',
+};
+const DEFAULT_MEMO = { sns:'', video:'', info:'' };
+const INIT_DATA = [
+  {date:'2026-06-01',dow:'월',bcast:'고수외전 본방',g:6073,gin:361,gout:28,ktF:1826,ktV:9229,yt:0,tt:0,ntv:0,asia:0,news:0,etoday:0},
+  {date:'2026-06-02',dow:'화',bcast:'고수외전 재방',g:6327,gin:283,gout:29,ktF:2837,ktV:5245,yt:0,tt:0,ntv:0,asia:0,news:0,etoday:0},
+  {date:'2026-06-03',dow:'수',bcast:'방송없음',g:6347,gin:39,gout:19,ktF:3877,ktV:6341,yt:0,tt:0,ntv:0,asia:0,news:0,etoday:0},
+  {date:'2026-06-04',dow:'목',bcast:'방송없음',g:6332,gin:9,gout:24,ktF:3884,ktV:285,yt:0,tt:0,ntv:0,asia:0,news:0,etoday:0},
+  {date:'2026-06-05',dow:'금',bcast:'방송없음',g:6322,gin:8,gout:18,ktF:3913,ktV:283,yt:0,tt:0,ntv:0,asia:0,news:0,etoday:0},
+  {date:'2026-06-06',dow:'토',bcast:'방송없음',g:6325,gin:7,gout:4,ktF:3938,ktV:219,yt:0,tt:0,ntv:0,asia:0,news:0,etoday:0},
+  {date:'2026-06-07',dow:'일',bcast:'고수외전 재방',g:6409,gin:99,gout:15,ktF:4793,ktV:4731,yt:0,tt:0,ntv:0,asia:0,news:0,etoday:0},
+  {date:'2026-06-08',dow:'월',bcast:'고수외전 본방',g:6527,gin:144,gout:26,ktF:5523,ktV:3838,yt:0,tt:0,ntv:0,asia:0,news:0,etoday:0},
+  {date:'2026-06-09',dow:'화',bcast:'고수외전 재방',g:6596,gin:86,gout:17,ktF:6076,ktV:3399,yt:0,tt:0,ntv:0,asia:0,news:0,etoday:0},
+];
+
+let CFG={...DEFAULT_CFG}, MEMO={...DEFAULT_MEMO}, DATA=[];
+let editDate=null, tapCount=0, tapTimer=null;
+let cSns, cVideo, cInfo;
+
+const sort=arr=>[...arr].sort((a,b)=>a.date.localeCompare(b.date));
+const $=id=>document.getElementById(id);
+const GAS=()=>CFG.gasUrl;
+const num=v=>+v||0;
+
+function setStatus(t,m){$('statusBar').className='status-bar '+t;$('statusText').textContent=m;}
+function showFlash(m,t){const e=$('flashMsg');e.textContent=m;e.className='flash '+t;setTimeout(()=>e.className='flash',3000);}
+function fmtDate(v){
+  if(!v)return'';
+  if(typeof v==='string'&&v.match(/^\d{4}-\d{2}-\d{2}$/))return v;
+  if(typeof v==='string'&&v.startsWith('Date(')){const p=v.replace('Date(','').replace(')','').split(',');return`${p[0]}-${String(+p[1]+1).padStart(2,'0')}-${String(+p[2]).padStart(2,'0')}`;}
+  return String(v).slice(0,10);
+}
+
+function loadLocalCfg(){try{const s=localStorage.getItem('gosu_cfg');if(s)CFG={...DEFAULT_CFG,...JSON.parse(s)};}catch{}}
+function saveLocalCfg(){localStorage.setItem('gosu_cfg',JSON.stringify(CFG));}
+function loadLocalData(){try{const s=localStorage.getItem('gosu_data');return s?JSON.parse(s):[...INIT_DATA];}catch{return[...INIT_DATA];}}
+function saveLocalData(){localStorage.setItem('gosu_data',JSON.stringify(DATA));}
+function loadLocalMemo(){try{const s=localStorage.getItem('gosu_memo');return s?JSON.parse(s):{...DEFAULT_MEMO};}catch{return{...DEFAULT_MEMO};}}
+function saveLocalMemo(){localStorage.setItem('gosu_memo',JSON.stringify(MEMO));}
+
+function gasPost(b){fetch(GAS(),{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(b),mode:'no-cors'}).catch(e=>console.warn('GAS:',e));}
+
+async function loadSheetData(){
+  const url=`https://docs.google.com/spreadsheets/d/${CFG.sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(CFG.sheetName)}`;
+  const res=await fetch(url);const text=await res.text();
+  const json=JSON.parse(text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1]);
+  return(json.table.rows||[]).map(r=>({
+    date:fmtDate(r.c[0]?.v),dow:r.c[1]?.v||'',bcast:r.c[2]?.v||'방송없음',
+    g:num(r.c[3]?.v),gin:num(r.c[4]?.v),gout:num(r.c[5]?.v),
+    ktF:num(r.c[6]?.v),ktV:num(r.c[7]?.v),
+    yt:num(r.c[8]?.v),tt:num(r.c[9]?.v),ntv:num(r.c[10]?.v),
+    asia:num(r.c[11]?.v),news:num(r.c[12]?.v),etoday:num(r.c[13]?.v),
+  })).filter(r=>r.date&&r.g>0);
+}
+
+async function init(){
+  loadLocalCfg();
+  MEMO=loadLocalMemo();
+  try{
+    const res=await fetch(`${GAS()}?action=getSettings`);
+    const json=await res.json();
+    if(json.ok&&json.settings&&Object.keys(json.settings).length>0){
+      const s=json.settings;
+      if(s.launch&&String(s.launch).includes('T'))s.launch=String(s.launch).slice(0,10);
+      CFG={...CFG,...s};saveLocalCfg();
+    }
+  }catch(e){console.warn('설정 로드 실패, 로컬 사용:',e);}
+  applyCfgToForm();
+  try{
+    const rows=await loadSheetData();
+    if(rows.length>0){
+      const local=loadLocalData();
+      const merged=[...rows];
+      local.forEach(lr=>{if(!merged.find(r=>r.date===lr.date))merged.push(lr);});
+      DATA=sort(merged);saveLocalData();
+      setStatus('live',`구글 시트 연동 · 최신: ${DATA[DATA.length-1].date} · ${DATA.length}일`);
+    }else throw new Error('빈 시트');
+  }catch(e){DATA=sort(loadLocalData());setStatus('warn','구글 시트 연동 불가 — 로컬 데이터 표시 중');}
+  $('loadingState').style.display='none';
+  $('mainBody').style.display='block';
+  render();
+  setInterval(async()=>{try{const rows=await loadSheetData();if(rows.length>0){const local=loadLocalData();const merged=[...rows];local.forEach(lr=>{if(!merged.find(r=>r.date===lr.date))merged.push(lr);});DATA=sort(merged);saveLocalData();render();setStatus('live',`구글 시트 연동 · 최신: ${DATA[DATA.length-1].date}`);}}catch(e){}},5*60*1000);
+}
+
+$('mainTitle').addEventListener('click',()=>{
+  tapCount++;const hint=$('tapHint'),rem=5-tapCount;
+  if(rem>0){hint.textContent=`${rem}번 더 탭하면 관리자 모드`;hint.classList.add('show');clearTimeout(tapTimer);tapTimer=setTimeout(()=>{tapCount=0;hint.classList.remove('show');},2000);}
+  else{tapCount=0;hint.classList.remove('show');$('adminFab').classList.add('visible');showFlash('⚙️ 관리자 모드 활성화','ok');}
+});
+
+function openAdmin(){$('adminOverlay').classList.add('open');renderList();applyMemoToForm();}
+function closeAdmin(){$('adminOverlay').classList.remove('open');}
+function overlayClick(e){if(e.target===$('adminOverlay'))closeAdmin();}
+function switchTab(t){
+  ['input','list','memo','settings'].forEach((n,i)=>{
+    document.querySelectorAll('.atab')[i].classList.toggle('active',n===t);
+    $('tab-'+n).classList.toggle('active',n===t);
+  });
+  if(t==='list')renderList();
+  if(t==='memo')applyMemoToForm();
+}
+
+function setToday(){const now=new Date();$('f_date').value=now.toISOString().slice(0,10);$('f_dow').value=['일','월','화','수','목','금','토'][now.getDay()];}
+function clearForm(){['f_g','f_gin','f_gout','f_kt','f_ktv','f_yt','f_tt','f_ntv','f_asia','f_news','f_etoday'].forEach(id=>$(id).value='');$('f_bcast').value='방송없음';setToday();}
+function loadEditForm(date){
+  const r=DATA.find(d=>d.date===date);if(!r)return;
+  editDate=date;$('f_date').value=r.date;$('f_dow').value=r.dow;$('f_bcast').value=r.bcast;
+  $('f_g').value=r.g||'';$('f_gin').value=r.gin||'';$('f_gout').value=r.gout||'';
+  $('f_kt').value=r.ktF||'';$('f_ktv').value=r.ktV||'';
+  $('f_yt').value=r.yt||'';$('f_tt').value=r.tt||'';$('f_ntv').value=r.ntv||'';
+  $('f_asia').value=r.asia||'';$('f_news').value=r.news||'';$('f_etoday').value=r.etoday||'';
+  $('editBannerText').textContent=`✏️ ${date} 수정 중`;
+  $('editBanner').classList.add('show');switchTab('input');
+}
+function cancelEdit(){editDate=null;$('editBanner').classList.remove('show');clearForm();}
+
+function saveRow(){
+  const date=$('f_date').value;if(!date){showFlash('날짜를 입력하세요','err');return;}
+  const g=num($('f_g').value);if(!g){showFlash('텔레그램 구독자를 입력하세요','err');return;}
+  const row={date,dow:$('f_dow').value,bcast:$('f_bcast').value,
+    g,gin:num($('f_gin').value),gout:num($('f_gout').value),
+    ktF:num($('f_kt').value),ktV:num($('f_ktv').value),
+    yt:num($('f_yt').value),tt:num($('f_tt').value),ntv:num($('f_ntv').value),
+    asia:num($('f_asia').value),news:num($('f_news').value),etoday:num($('f_etoday').value)};
+  const idx=DATA.findIndex(r=>r.date===date);
+  if(idx>=0)DATA[idx]=row;else DATA.push(row);
+  DATA=sort(DATA);saveLocalData();gasPost({action:'upsert',row});
+  showFlash(editDate?'✓ 수정 완료 · 구글 시트 반영 중':'✓ 저장 완료 · 구글 시트 반영 중','ok');
+  cancelEdit();render();renderList();
+}
+function deleteRow(date){
+  if(!confirm(`${date} 데이터를 삭제할까요?`))return;
+  DATA=DATA.filter(r=>r.date!==date);saveLocalData();gasPost({action:'delete',date});
+  showFlash('✓ 삭제 완료','ok');render();renderList();
+}
+
+function renderList(){
+  const el=$('dataList');
+  if(!DATA.length){el.innerHTML='<div style="text-align:center;padding:20px;color:#ADB5BD">데이터 없음</div>';return;}
+  el.innerHTML=[...DATA].reverse().map(r=>{
+    const net=r.gin-r.gout;
+    return`<div class="data-item"><div class="di-header"><div><span class="di-date">${r.date}</span><span style="font-size:11px;color:#ADB5BD;margin-left:6px">${r.dow}요일</span></div><div class="di-btns"><button onclick="loadEditForm('${r.date}')" style="background:#EBF3FE;color:#3182F6">수정</button><button onclick="deleteRow('${r.date}')" style="background:#FEECEE;color:#F04452">삭제</button></div></div><div class="di-grid"><div><div class="dc-l">텔레그램</div><div class="dc-v">${r.g.toLocaleString()}</div></div><div><div class="dc-l">순증</div><div class="dc-v" style="color:${net>=0?'#00B493':'#F04452'}">${net>=0?'+':''}${net}</div></div><div><div class="dc-l">카톡</div><div class="dc-v" style="color:#F5A623">${r.ktF.toLocaleString()}</div></div><div><div class="dc-l">광고유입</div><div class="dc-v" style="color:#8B5CF6">${(r.asia+r.news+r.etoday).toLocaleString()}</div></div></div></div>`;
+  }).join('');
+}
+
+function applyMemoToForm(){$('m_sns').value=MEMO.sns;$('m_video').value=MEMO.video;$('m_info').value=MEMO.info;}
+function saveMemo(){
+  MEMO.sns=$('m_sns').value.trim();
+  MEMO.video=$('m_video').value.trim();
+  MEMO.info=$('m_info').value.trim();
+  saveLocalMemo();
+  gasPost({action:'saveMemo',memo:MEMO});
+  renderMemo();
+  showFlash('✓ 비고 저장 완료','ok');
+}
+function renderMemo(){
+  ['sns','video','info'].forEach(k=>{
+    const el=$(`memo-${k}`);
+    if(MEMO[k]){el.textContent=MEMO[k];el.style.color='#191F28';}
+    else{el.innerHTML='<span class="memo-empty">관리자에서 비고를 입력하세요</span>';}
+  });
+}
+
+function applyCfgToForm(){
+  $('s_channel').value=CFG.channel;$('s_program').value=CFG.program;
+  $('s_freq').value=CFG.freq;$('s_main').value=CFG.mainDay;$('s_rerun').value=CFG.rerunDay;
+  $('s_launch').value=CFG.launch;$('s_sheetId').value=CFG.sheetId;
+  $('s_sheetName').value=CFG.sheetName;$('s_gasUrl').value=CFG.gasUrl;
+}
+function saveSettings(){
+  CFG.channel=$('s_channel').value.trim();CFG.program=$('s_program').value.trim();
+  CFG.freq=$('s_freq').value.trim();CFG.mainDay=$('s_main').value.trim();
+  CFG.rerunDay=$('s_rerun').value.trim();CFG.launch=$('s_launch').value;
+  CFG.sheetId=$('s_sheetId').value.trim();CFG.sheetName=$('s_sheetName').value.trim();
+  CFG.gasUrl=$('s_gasUrl').value.trim();
+  saveLocalCfg();gasPost({action:'saveSettings',cfg:CFG});
+  applyCfgToForm();render();showFlash('✓ 설정 저장 완료','ok');
+}
+function resetData(){
+  if(!confirm('로컬 데이터를 초기화할까요?'))return;
+  localStorage.removeItem('gosu_data');DATA=sort([...INIT_DATA]);saveLocalData();
+  render();renderList();showFlash('✓ 초기화 완료','ok');
+}
+
+// ── 렌더 ──────────────────────────────────────────────────────────
+const GR='#F0F2F5',TK='#ADB5BD';
+function db(v){
+  if(v>0)return`<span class="db db-up">▲ +${v.toLocaleString()}</span>`;
+  if(v<0)return`<span class="db db-dn">▼ ${v.toLocaleString()}</span>`;
+  return`<span class="db db-neu">─ 0</span>`;
+}
+
+function render(){
+  if(!DATA.length)return;
+  const last=DATA[DATA.length-1];
+  const w7=DATA.slice(-7);
+  const wf=w7[0];
+  const period=`${wf.date} ~ ${last.date}`;
+
+  document.title=`${CFG.program} 주간 업무보고`;
+  $('hdr-program').textContent=CFG.program;
+  $('lastDate').textContent=last.date;
+  $('periodLabel').textContent=period;
+  ['sns-period','video-period','info-period'].forEach(id=>$(id).textContent=period);
+
+  // SNS
+  const ktNet=last.ktF-(wf.ktF||0);
+  const ktDays=w7.filter(r=>r.ktF>0).length;
+  const ktAvg=ktDays>1?Math.round(ktNet/(ktDays-1)):ktNet;
+  $('kt-val').textContent=last.ktF.toLocaleString();
+  $('kt-net').innerHTML=db(ktNet);
+  $('kt-avg').textContent=(ktAvg>=0?'+':'')+ktAvg+'명/일';
+  const tgNet=w7.reduce((s,r)=>s+r.gin-r.gout,0);
+  const tIn=w7.reduce((s,r)=>s+r.gin,0),tOut=w7.reduce((s,r)=>s+r.gout,0);
+  $('tg-val').textContent=last.g.toLocaleString();
+  $('tg-net').innerHTML=db(tgNet);
+  $('tg-churn').textContent=(tIn>0?(tOut/tIn*100).toFixed(1):'0.0')+'%';
+
+  // SNS 차트
+  const lb=w7.map(r=>r.date.slice(5)+'('+r.dow+')');
+  if(cSns)cSns.destroy();
+  cSns=new Chart($('chartSns'),{type:'line',
+    data:{labels:lb,datasets:[
+      {label:'카카오',data:w7.map(r=>r.ktF),borderColor:'#F5A623',backgroundColor:'rgba(245,166,35,.08)',tension:.3,pointRadius:4,pointBackgroundColor:'#F5A623',borderWidth:2.5,fill:true,yAxisID:'yA'},
+      {label:'텔레그램',data:w7.map(r=>r.g),borderColor:'#3182F6',backgroundColor:'rgba(49,130,246,.08)',tension:.3,pointRadius:4,pointBackgroundColor:'#3182F6',borderWidth:2.5,fill:true,yAxisID:'yB'},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom',labels:{color:TK,font:{size:11},boxWidth:12,padding:12}},tooltip:{mode:'index',intersect:false,callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.parsed.y.toLocaleString()+'명'}}},
+      scales:{yA:{position:'left',ticks:{color:'#F5A623',font:{size:9}},grid:{color:GR},border:{color:GR}},yB:{position:'right',ticks:{color:'#3182F6',font:{size:9}},grid:{display:false},border:{color:GR}},x:{ticks:{color:TK,font:{size:9}},grid:{color:GR},border:{color:GR}}}}
+  });
+
+  // 영상 채널
+  const ytN=last.yt-(wf.yt||0),ttN=last.tt-(wf.tt||0),ntvN=last.ntv-(wf.ntv||0);
+  $('yt-val').textContent=last.yt?last.yt.toLocaleString():'—';
+  $('tt-val').textContent=last.tt?last.tt.toLocaleString():'—';
+  $('ntv-val').textContent=last.ntv?last.ntv.toLocaleString():'—';
+  $('yt-net').innerHTML=db(ytN);
+  $('tt-net').innerHTML=db(ttN);
+  $('ntv-net').innerHTML=db(ntvN);
+
+  if(cVideo)cVideo.destroy();
+  const hasV=w7.some(r=>r.yt>0||r.tt>0||r.ntv>0);
+  if(hasV){
+    cVideo=new Chart($('chartVideo'),{type:'line',
+      data:{labels:lb,datasets:[
+        {label:'유튜브',data:w7.map(r=>r.yt),borderColor:'#FF0000',tension:.3,pointRadius:3,borderWidth:2,fill:false},
+        {label:'틱톡',data:w7.map(r=>r.tt),borderColor:'#555',tension:.3,pointRadius:3,borderWidth:2,fill:false},
+        {label:'네이버TV',data:w7.map(r=>r.ntv),borderColor:'#00C73C',tension:.3,pointRadius:3,borderWidth:2,fill:false},
+      ]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{position:'bottom',labels:{color:TK,font:{size:11},boxWidth:12,padding:10}},tooltip:{mode:'index',intersect:false,callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.parsed.y.toLocaleString()+'명'}}},
+        scales:{x:{ticks:{color:TK,font:{size:9}},grid:{color:GR},border:{color:GR}},y:{ticks:{color:TK,font:{size:9},callback:v=>v.toLocaleString()},grid:{color:GR},border:{color:GR}}}}
+    });
+  } else {
+    const ctx=$('chartVideo').getContext('2d');
+    $('chartVideo').height=80;
+    ctx.fillStyle='#ADB5BD';ctx.font='13px Pretendard';ctx.textAlign='center';
+    ctx.fillText('영상 채널 데이터를 관리자에서 입력해주세요',$('chartVideo').width/2,50);
+  }
+
+  // 인포머셜
+  const infos=[
+    {name:'아시아경제',color:'#3182F6',vals:w7.map(r=>r.asia),total:w7.reduce((s,r)=>s+r.asia,0)},
+    {name:'뉴스핌',color:'#00B493',vals:w7.map(r=>r.news),total:w7.reduce((s,r)=>s+r.news,0)},
+    {name:'이투데이',color:'#8B5CF6',vals:w7.map(r=>r.etoday),total:w7.reduce((s,r)=>s+r.etoday,0)},
+  ];
+  const iMax=Math.max(...infos.map(i=>i.total),1);
+  $('infoRows').innerHTML=infos.map(i=>`
+    <div class="info-row">
+      <div class="info-name">${i.name}</div>
+      <div class="info-bar-wrap"><div class="info-bar" style="width:${Math.round(i.total/iMax*100)}%;background:${i.color}"></div></div>
+      <div class="info-right">
+        <div class="info-val" style="color:${i.color}">${i.total?i.total.toLocaleString():'-'}</div>
+        <div class="info-delta">7일 누계</div>
+      </div>
+    </div>`).join('');
+
+  if(cInfo)cInfo.destroy();
+  const hasI=w7.some(r=>r.asia>0||r.news>0||r.etoday>0);
+  if(hasI){
+    cInfo=new Chart($('chartInfo'),{type:'bar',
+      data:{labels:lb,datasets:[
+        {label:'아시아경제',data:w7.map(r=>r.asia),backgroundColor:'rgba(49,130,246,.8)',borderRadius:4},
+        {label:'뉴스핌',data:w7.map(r=>r.news),backgroundColor:'rgba(0,180,147,.8)',borderRadius:4},
+        {label:'이투데이',data:w7.map(r=>r.etoday),backgroundColor:'rgba(139,92,246,.8)',borderRadius:4},
+      ]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{position:'bottom',labels:{color:TK,font:{size:11},boxWidth:12,padding:10}},tooltip:{mode:'index',intersect:false}},
+        scales:{x:{stacked:true,ticks:{color:TK,font:{size:9}},grid:{display:false},border:{color:GR}},y:{stacked:true,ticks:{color:TK,font:{size:9}},grid:{color:GR},border:{color:GR}}}}
+    });
+  }
+
+  renderMemo();
+}
+
+setToday();
+init();
+</script>
+</body>
+</html>
