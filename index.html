@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>담당업무 현황</title>
+<link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#F0F2F5;color:#191F28;font-family:'Pretendard','Apple SD Gothic Neo',sans-serif;min-height:100vh}
+.page{max-width:960px;margin:0 auto;padding-bottom:80px}
+.card{background:#fff;border-radius:16px;box-shadow:0 1px 10px rgba(0,0,0,.06);padding:22px;margin-bottom:14px}
+.card-sm{background:#fff;border-radius:14px;box-shadow:0 1px 6px rgba(0,0,0,.04);padding:16px}
+input,select,textarea{width:100%;padding:10px 12px;background:#F5F6F8;border:1.5px solid #E8EAED;border-radius:10px;font-size:13px;color:#191F28;outline:none;font-family:inherit;transition:border-color .15s}
+input:focus,select:focus,textarea:focus{border-color:#3182F6}
+textarea{resize:vertical;min-height:70px}
+label{display:block;font-size:11px;font-weight:700;color:#6B7684;margin-bottom:5px}
+.form-row{margin-bottom:12px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:10px 18px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;border:none;font-family:inherit;transition:all .15s}
+.btn-blue{background:#3182F6;color:#fff}.btn-blue:hover{background:#1A6DEB}
+.btn-ghost{background:#F5F6F8;color:#6B7684}.btn-ghost:hover{background:#E8EAED}
+.btn-full{width:100%;padding:13px}
+.flash{padding:10px 14px;border-radius:10px;font-size:13px;font-weight:700;text-align:center;margin-bottom:12px;display:none}
+.flash.ok{background:#E5F7F3;color:#00B493;display:block}
+.flash.err{background:#FEECEE;color:#F04452;display:block}
+
+/* 헤더 */
+.topbar{background:#fff;border-bottom:1px solid #E8EAED;padding:14px 20px}
+.topbar-inner{display:flex;justify-content:space-between;align-items:center}
+.report-tag{font-size:10px;font-weight:700;color:#ADB5BD;letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px}
+.report-title{font-size:20px;font-weight:800;letter-spacing:-.5px;cursor:default;user-select:none}
+.report-title em{font-style:normal;color:#3182F6}
+.status-bar{display:flex;align-items:center;gap:8px;padding:8px 20px;font-size:12px;font-weight:600}
+.status-bar.live{background:#EBF3FE;color:#3182F6}
+.status-bar.warn{background:#FFF5E0;color:#F5A623}
+.status-bar.err{background:#FEECEE;color:#F04452}
+.sd{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.live .sd{background:#00B493;animation:pulse 2s infinite}
+.warn .sd,.err .sd{background:currentColor}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* 주차 네비게이터 */
+.week-nav{display:flex;align-items:center;gap:10px;padding:12px 20px;background:#fff;border-bottom:1px solid #E8EAED}
+.week-btn{width:32px;height:32px;border-radius:50%;background:#F5F6F8;border:none;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;color:#6B7684;transition:all .15s;flex-shrink:0}
+.week-btn:hover{background:#EBF3FE;color:#3182F6}
+.week-btn:disabled{opacity:.3;cursor:default}
+.week-label{flex:1;text-align:center}
+.week-title{font-size:15px;font-weight:800;color:#191F28;letter-spacing:-.3px}
+.week-range{font-size:11px;color:#ADB5BD;margin-top:2px}
+.week-today-btn{padding:5px 12px;background:#EBF3FE;color:#3182F6;border:none;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap}
+.week-today-btn:hover{background:#D6E8FD}
+
+/* 섹션 */
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.section-badge{display:flex;align-items:center;gap:8px}
+.section-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.section-label{font-size:15px;font-weight:800;letter-spacing:-.3px}
+.section-period{font-size:11px;color:#ADB5BD}
+
+/* 채널 카드 */
+.channel-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.channel-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px}
+.ch-card{background:#F8F9FB;border-radius:12px;padding:14px}
+.ch-name{font-size:11px;font-weight:700;color:#6B7684;margin-bottom:6px}
+.ch-value{font-size:26px;font-weight:800;letter-spacing:-1px;line-height:1;margin-bottom:6px}
+.ch-stats{display:flex;gap:12px;flex-wrap:wrap}
+.ch-stat-label{font-size:10px;color:#ADB5BD}
+.ch-stat-value{font-size:12px;font-weight:700;margin-top:1px}
+
+/* 델타 */
+.db{display:inline-flex;align-items:center;gap:2px;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:800}
+.db-up{background:#E5F7F3;color:#00B493}
+.db-dn{background:#FEECEE;color:#F04452}
+.db-neu{background:#F5F6F8;color:#ADB5BD}
+
+/* 차트 */
+.chart-area{position:relative;height:180px;margin-bottom:16px}
+
+/* 비고 */
+.memo-wrap{margin-top:4px}
+.memo-label{font-size:11px;font-weight:700;color:#ADB5BD;margin-bottom:6px}
+.memo-box{background:#F8F9FB;border-radius:10px;padding:12px;font-size:13px;color:#191F28;line-height:1.7;min-height:48px;white-space:pre-wrap;word-break:break-all}
+.memo-empty{color:#ADB5BD}
+
+/* 인포머셜 */
+.info-row{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid #F0F2F5}
+.info-row:last-child{border-bottom:none}
+.info-name{font-size:13px;font-weight:700;width:80px;flex-shrink:0}
+.info-bar-wrap{flex:1;height:8px;background:#F0F2F5;border-radius:4px;overflow:hidden}
+.info-bar{height:100%;border-radius:4px}
+.info-right{min-width:70px;text-align:right}
+.info-val{font-size:13px;font-weight:800}
+.info-delta{font-size:11px;color:#ADB5BD;margin-top:1px}
+
+/* 관리자 */
+.admin-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;overflow-y:auto}
+.admin-overlay.open{display:flex;align-items:flex-start;justify-content:center;padding:20px}
+.admin-panel{background:#fff;border-radius:20px;width:100%;max-width:560px;margin:auto}
+.admin-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #E8EAED}
+.admin-header-title{font-size:16px;font-weight:800}
+.close-btn{width:32px;height:32px;border-radius:50%;background:#F5F6F8;border:none;cursor:pointer;font-size:20px;display:flex;align-items:center;justify-content:center;color:#6B7684}
+.admin-tabs{display:flex;border-bottom:1px solid #E8EAED}
+.atab{flex:1;padding:12px 0;background:none;border:none;cursor:pointer;font-size:12px;font-weight:700;color:#ADB5BD;font-family:inherit;border-bottom:2.5px solid transparent;transition:all .15s}
+.atab.active{color:#3182F6;border-bottom-color:#3182F6}
+.admin-body{padding:16px;max-height:75vh;overflow-y:auto}
+.tab-pane{display:none}.tab-pane.active{display:block}
+.shd{font-size:12px;font-weight:800;color:#191F28;margin:14px 0 10px;padding-bottom:7px;border-bottom:1px solid #E8EAED}
+.shd:first-child{margin-top:0}
+.data-item{background:#F5F6F8;border-radius:12px;padding:12px;margin-bottom:8px}
+.di-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.di-date{font-size:14px;font-weight:800}
+.di-btns button{padding:4px 10px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;border:none;font-family:inherit;margin-left:5px}
+.di-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;text-align:center}
+.dc-l{font-size:10px;color:#ADB5BD;margin-bottom:1px}
+.dc-v{font-size:12px;font-weight:700}
+.edit-banner{background:#EBF3FE;border-radius:10px;padding:10px 14px;margin-bottom:12px;display:none;justify-content:space-between;align-items:center}
+.edit-banner.show{display:flex}
+.new-btn{width:100%;padding:12px;background:#fff;color:#3182F6;border:1.5px dashed #3182F6;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:10px}
+.new-btn:hover{background:#EBF3FE}
+.info-box-sm{background:#F5F6F8;border-radius:8px;padding:10px 12px;font-size:11px;color:#6B7684;line-height:1.7;margin-bottom:12px}
+.admin-fab{display:none;position:fixed;bottom:24px;right:24px;z-index:50}
+.admin-fab.visible{display:block}
+.admin-fab button{width:52px;height:52px;border-radius:50%;background:#3182F6;color:#fff;border:none;cursor:pointer;font-size:20px;box-shadow:0 4px 14px rgba(49,130,246,.4)}
+.tap-hint{position:fixed;top:60px;left:50%;transform:translateX(-50%);background:rgba(49,130,246,.9);color:#fff;padding:5px 14px;border-radius:20px;font-size:12px;font-weight:700;z-index:200;pointer-events:none;opacity:0;transition:opacity .3s;white-space:nowrap}
+.tap-hint.show{opacity:1}
+canvas{display:block}
+@media(max-width:500px){.channel-grid,.channel-grid-3{grid-template-columns:1fr 1fr}.di-grid{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div>
+      <div class="report-tag">주간 업무보고</div>
+      <div class="report-title" id="mainTitle">담당업무 현황<span id="hdr-program" style="display:none"></span></div>
+    </div>
+  </div>
+</div>
+
+<!-- 주차 네비게이터 -->
+<div class="week-nav">
+  <button class="week-btn" id="prevWeekBtn" onclick="moveWeek(-1)">←</button>
+  <div class="week-label">
+    <div class="week-title" id="weekTitle">—</div>
+    <div class="week-range" id="weekRange">—</div>
+  </div>
+  <button class="week-btn" id="nextWeekBtn" onclick="moveWeek(1)">→</button>
+  <button class="week-today-btn" onclick="goToday()">이번 주</button>
+</div>
+
+<div class="status-bar live" id="statusBar">
+  <div class="sd"></div>
+  <span id="statusText">데이터 불러오는 중...</span>
+</div>
+<div class="tap-hint" id="tapHint"></div>
+
+<div class="page">
+<div id="mainBody" style="padding:14px 16px 0;display:none">
+
+  <!-- SNS -->
+  <div class="card">
+    <div class="section-header">
+      <div class="section-badge">
+        <div class="section-icon" style="background:#FFF5E0">💬</div>
+        <div class="section-label">SNS 채널</div>
+      </div>
+      <div class="section-period" id="sns-period">—</div>
+    </div>
+    <div class="channel-grid">
+      <div class="ch-card">
+        <div class="ch-name">💬 카카오채널</div>
+        <div class="ch-value" id="kt-val" style="color:#F5A623">—</div>
+        <div class="ch-stats">
+          <div><div class="ch-stat-label">주간 순증</div><div class="ch-stat-value" id="kt-net">—</div></div>
+          <div><div class="ch-stat-label">일평균</div><div class="ch-stat-value" id="kt-avg">—</div></div>
+        </div>
+      </div>
+      <div class="ch-card">
+        <div class="ch-name">✈️ 텔레그램</div>
+        <div class="ch-value" id="tg-val" style="color:#3182F6">—</div>
+        <div class="ch-stats">
+          <div><div class="ch-stat-label">주간 순증</div><div class="ch-stat-value" id="tg-net">—</div></div>
+          <div><div class="ch-stat-label">이탈률</div><div class="ch-stat-value" id="tg-churn">—</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="chart-area"><canvas id="chartSns"></canvas></div>
+    <div class="memo-wrap">
+      <div class="memo-label">📝 비고</div>
+      <div class="memo-box" id="memo-sns"><span class="memo-empty">비고 없음</span></div>
+    </div>
+  </div>
+
+  <!-- 영상 -->
+  <div class="card">
+    <div class="section-header">
+      <div class="section-badge">
+        <div class="section-icon" style="background:#FFE8E8">▶️</div>
+        <div class="section-label">영상 채널</div>
+      </div>
+      <div class="section-period" id="video-period">—</div>
+    </div>
+    <div class="channel-grid-3">
+      <div class="ch-card">
+        <div class="ch-name">▶️ 유튜브</div>
+        <div class="ch-value" id="yt-val" style="color:#FF0000">—</div>
+        <div class="ch-stats"><div><div class="ch-stat-label">주간 증감</div><div class="ch-stat-value" id="yt-net">—</div></div></div>
+      </div>
+      <div class="ch-card">
+        <div class="ch-name">🎵 틱톡</div>
+        <div class="ch-value" id="tt-val" style="color:#191F28">—</div>
+        <div class="ch-stats"><div><div class="ch-stat-label">주간 증감</div><div class="ch-stat-value" id="tt-net">—</div></div></div>
+      </div>
+      <div class="ch-card">
+        <div class="ch-name">📺 네이버TV</div>
+        <div class="ch-value" id="ntv-val" style="color:#00C73C">—</div>
+        <div class="ch-stats"><div><div class="ch-stat-label">주간 증감</div><div class="ch-stat-value" id="ntv-net">—</div></div></div>
+      </div>
+    </div>
+    <div class="chart-area"><canvas id="chartVideo"></canvas></div>
+    <div class="memo-wrap">
+      <div class="memo-label">📝 비고</div>
+      <div class="memo-box" id="memo-video"><span class="memo-empty">비고 없음</span></div>
+    </div>
+  </div>
+
+  <!-- 인포머셜 -->
+  <div class="card">
+    <div class="section-header">
+      <div class="section-badge">
+        <div class="section-icon" style="background:#E8F4FF">📰</div>
+        <div class="section-label">인포머셜 광고 유입</div>
+      </div>
+      <div class="section-period" id="info-period">—</div>
+    </div>
+    <div id="infoRows"></div>
+    <div class="chart-area" style="height:150px;margin-top:14px"><canvas id="chartInfo"></canvas></div>
+    <div class="memo-wrap" style="margin-top:14px">
+      <div class="memo-label">📝 비고</div>
+      <div class="memo-box" id="memo-info"><span class="memo-empty">비고 없음</span></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- 로딩 -->
+<div id="loadingState" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:14px">
+  <div style="width:30px;height:30px;border:3px solid #E8EAED;border-top-color:#3182F6;border-radius:50%;animation:spin .8s linear infinite"></div>
+  <div style="font-size:13px;color:#6B7684">데이터 불러오는 중...</div>
+</div>
+</div>
+
+<!-- FAB -->
+<div class="admin-fab" id="adminFab">
+  <button onclick="openAdmin()">⚙️</button>
+</div>
+
+<!-- 관리자 -->
+<div class="admin-overlay" id="adminOverlay" onclick="overlayClick(event)">
+  <div class="admin-panel">
+    <div class="admin-header">
+      <div class="admin-header-title">데이터 관리</div>
+      <button class="close-btn" onclick="closeAdmin()">×</button>
+    </div>
+    <div class="admin-tabs">
+      <button class="atab active" onclick="switchTab('input')">새 입력</button>
+      <button class="atab" onclick="switchTab('list')">목록·수정</button>
+      <button class="atab" onclick="switchTab('memo')">비고</button>
+      <button class="atab" onclick="switchTab('settings')">설정</button>
+    </div>
+    <div class="admin-body">
+      <div class="flash" id="flashMsg"></div>
+
+      <!-- 입력 -->
+      <div class="tab-pane active" id="tab-input">
+        <div class="edit-banner" id="editBanner">
+          <span style="font-size:13px;font-weight:700;color:#3182F6" id="editBannerText"></span>
+          <button onclick="cancelEdit()" style="background:none;border:none;font-size:22px;color:#3182F6;cursor:pointer">×</button>
+        </div>
+        <div class="g3 form-row">
+          <div><label>날짜</label><input type="date" id="f_date"></div>
+          <div><label>요일</label>
+            <select id="f_dow"><option>월</option><option>화</option><option>수</option><option>목</option><option>금</option><option>토</option><option>일</option></select>
+          </div>
+          <div><label>방송여부</label>
+            <select id="f_bcast">
+              <option value="방송없음">방송없음</option>
+              <option value="고수외전 본방">본방(월)</option>
+              <option value="고수외전 재방">재방(화·일)</option>
+            </select>
+          </div>
+        </div>
+        <div style="background:#EBF3FE;border-radius:12px;padding:14px;margin-bottom:10px">
+          <div style="font-size:11px;font-weight:800;color:#3182F6;margin-bottom:10px">💬 SNS 채널</div>
+          <div class="form-row"><label>텔레그램 총 구독자</label><input type="number" id="f_g" placeholder="예: 6596"></div>
+          <div class="g2 form-row" style="margin:0">
+            <div><label>텔레그램 입장</label><input type="number" id="f_gin" placeholder="86"></div>
+            <div><label>텔레그램 이탈</label><input type="number" id="f_gout" placeholder="17"></div>
+          </div>
+          <div class="g2 form-row" style="margin-top:10px;margin-bottom:0">
+            <div><label>카카오 친구수</label><input type="number" id="f_kt" placeholder="6076"></div>
+            <div><label>카카오 조회수</label><input type="number" id="f_ktv" placeholder="3399"></div>
+          </div>
+        </div>
+        <div style="background:#F3EEFF;border-radius:12px;padding:14px;margin-bottom:10px">
+          <div style="font-size:11px;font-weight:800;color:#8B5CF6;margin-bottom:10px">▶️ 영상 채널</div>
+          <div class="g3">
+            <div><label>유튜브</label><input type="number" id="f_yt" placeholder="0"></div>
+            <div><label>틱톡</label><input type="number" id="f_tt" placeholder="0"></div>
+            <div><label>네이버TV</label><input type="number" id="f_ntv" placeholder="0"></div>
+          </div>
+        </div>
+        <div style="background:#E5F7F3;border-radius:12px;padding:14px;margin-bottom:14px">
+          <div style="font-size:11px;font-weight:800;color:#00B493;margin-bottom:10px">📰 인포머셜 유입</div>
+          <div class="g3">
+            <div><label>아시아경제</label><input type="number" id="f_asia" placeholder="0"></div>
+            <div><label>뉴스핌</label><input type="number" id="f_news" placeholder="0"></div>
+            <div><label>이투데이</label><input type="number" id="f_etoday" placeholder="0"></div>
+          </div>
+        </div>
+        <button class="btn btn-blue btn-full" onclick="saveRow()">저장</button>
+      </div>
+
+      <!-- 목록 -->
+      <div class="tab-pane" id="tab-list">
+        <button class="new-btn" onclick="cancelEdit();switchTab('input')">+ 새 데이터 입력</button>
+        <div id="dataList"></div>
+      </div>
+
+      <!-- 비고 -->
+      <div class="tab-pane" id="tab-memo">
+        <div class="shd">SNS 채널 비고</div>
+        <div class="form-row"><textarea id="m_sns" placeholder="SNS 채널 관련 특이사항, 이슈, 계획 등"></textarea></div>
+        <div class="shd">영상 채널 비고</div>
+        <div class="form-row"><textarea id="m_video" placeholder="유튜브·틱톡·네이버TV 관련 특이사항"></textarea></div>
+        <div class="shd">인포머셜 광고 비고</div>
+        <div class="form-row"><textarea id="m_info" placeholder="광고 집행 현황, 유입 분석 등"></textarea></div>
+        <button class="btn btn-blue btn-full" onclick="saveMemo()">비고 저장</button>
+      </div>
+
+      <!-- 설정 -->
+      <div class="tab-pane" id="tab-settings">
+        <div class="shd">채널 · 방송 정보</div>
+        <div class="g2 form-row">
+          <div><label>채널명</label><input type="text" id="s_channel"></div>
+          <div><label>프로그램명</label><input type="text" id="s_program"></div>
+        </div>
+        <div class="g3 form-row">
+          <div><label>방송 횟수</label><input type="text" id="s_freq"></div>
+          <div><label>본방 요일</label><input type="text" id="s_main"></div>
+          <div><label>재방 요일</label><input type="text" id="s_rerun"></div>
+        </div>
+        <div class="form-row"><label>카카오채널 론칭일</label><input type="date" id="s_launch"></div>
+        <div class="shd">구글 시트 연동</div>
+        <div class="form-row"><label>스프레드시트 ID</label><input type="text" id="s_sheetId"></div>
+        <div class="form-row"><label>시트 탭 이름</label><input type="text" id="s_sheetName"></div>
+        <div class="form-row"><label>Apps Script URL</label><input type="text" id="s_gasUrl"></div>
+        <div class="info-box-sm">설정·비고는 구글 시트에 저장되어 모든 기기에서 공유됩니다.</div>
+        <button class="btn btn-blue btn-full" onclick="saveSettings()" style="margin-bottom:8px">설정 저장</button>
+        <button class="btn btn-ghost btn-full" onclick="resetData()">로컬 캐시 초기화</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── 상수 ──────────────────────────────────────────────────────────
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbzsaon4GipPoXzPCutUTP6_YAcpJL5_1gLhkjde5LNZB5EV7vEbuS_rLXc-_hbysg2p5A/exec';
+const DEFAULT_CFG = {
+  channel:'SBS Biz', program:'고수외전', freq:'주 3회',
+  mainDay:'월', rerunDay:'화,일', launch:'2026-06-01',
+  sheetId:'1QZk5g7GugoW1Sr-Iu-mjNpQeCpDbXpxb4TXOj9AREPc',
+  sheetName:'데이터', gasUrl: GAS_URL,
+};
+const DEFAULT_MEMO = {sns:'', video:'', info:''};
+
+// ── 상태 ──────────────────────────────────────────────────────────
+let CFG = {...DEFAULT_CFG};
+let MEMO = {...DEFAULT_MEMO};
+let ALL_DATA = []; // 전체 데이터
+let currentWeekStart = null; // 현재 보여주는 주의 월요일
+let editDate = null, tapCount = 0, tapTimer = null;
+let cSns, cVideo, cInfo;
+
+// ── 유틸 ──────────────────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+const num = v => +v || 0;
+const sort = arr => [...arr].sort((a,b) => a.date.localeCompare(b.date));
+const GAS = () => CFG.gasUrl || GAS_URL;
+
+function setStatus(t, m) { $('statusBar').className='status-bar '+t; $('statusText').textContent=m; }
+function showFlash(m, t) { const e=$('flashMsg'); e.textContent=m; e.className='flash '+t; setTimeout(()=>e.className='flash',3000); }
+
+// ── 주차 계산 ─────────────────────────────────────────────────────
+function getMondayOf(date) {
+  const d = new Date(date);
+  const day = d.getDay(); // 0=일,1=월...6=토
+  const diff = day === 0 ? -6 : 1 - day;
+  d.setDate(d.getDate() + diff);
+  d.setHours(0,0,0,0);
+  return d;
+}
+function addDays(date, n) {
+  const d = new Date(date);
+  d.setDate(d.getDate() + n);
+  return d;
+}
+function toYMD(date) {
+  return date.toISOString().slice(0,10);
+}
+function getWeekLabel(monday) {
+  const y = monday.getFullYear();
+  const m = monday.getMonth() + 1;
+  // 해당 월의 몇 번째 주인지
+  const firstDay = new Date(y, monday.getMonth(), 1);
+  const firstMonday = getMondayOf(firstDay);
+  // 월의 1일이 월요일이면 그게 1주, 아니면 그 전 월요일은 전월
+  let weekNum = Math.floor((monday - firstMonday) / (7*24*60*60*1000)) + 1;
+  if (weekNum <= 0) { weekNum = 1; }
+  return `${m}월 ${weekNum}주차`;
+}
+function getWeekData(monday) {
+  const start = toYMD(monday);
+  const end = toYMD(addDays(monday, 6));
+  return ALL_DATA.filter(r => r.date >= start && r.date <= end);
+}
+
+function moveWeek(dir) {
+  currentWeekStart = addDays(currentWeekStart, dir * 7);
+  updateWeekNav();
+  renderDashboard();
+}
+function goToday() {
+  currentWeekStart = getMondayOf(new Date());
+  updateWeekNav();
+  renderDashboard();
+}
+function updateWeekNav() {
+  const monday = currentWeekStart;
+  const sunday = addDays(monday, 6);
+  $('weekTitle').textContent = getWeekLabel(monday);
+  $('weekRange').textContent = `${toYMD(monday)} ~ ${toYMD(sunday)}`;
+  // 다음 주 버튼: 오늘 주 이후로는 비활성
+  const todayMonday = getMondayOf(new Date());
+  $('nextWeekBtn').disabled = monday >= todayMonday;
+}
+
+// ── GAS 통신 ──────────────────────────────────────────────────────
+async function gasGet(action) {
+  const res = await fetch(`${GAS()}?action=${action}`);
+  return res.json();
+}
+function gasPost(body) {
+  fetch(GAS(), {method:'POST', headers:{'Content-Type':'text/plain'}, body:JSON.stringify(body), mode:'no-cors'})
+    .catch(e => console.warn('GAS POST:', e));
+}
+
+// ── 초기화 ────────────────────────────────────────────────────────
+async function init() {
+  // 1. 설정 로드 (GAS → 실패시 로컬캐시)
+  try {
+    const r = await gasGet('getSettings');
+    if (r.ok && r.settings && Object.keys(r.settings).length > 0) {
+      const s = r.settings;
+      if (s.launch && String(s.launch).includes('T')) s.launch = String(s.launch).slice(0,10);
+      CFG = {...DEFAULT_CFG, ...s};
+    }
+  } catch(e) {
+    try { const s=localStorage.getItem('gosu_cfg'); if(s) CFG={...DEFAULT_CFG,...JSON.parse(s)}; } catch{}
+  }
+
+  // 2. 비고 로드 (GAS → 실패시 로컬캐시)
+  try {
+    const r = await gasGet('getMemo');
+    if (r.ok && r.memo) {
+      MEMO = {...DEFAULT_MEMO, ...r.memo};
+    }
+  } catch(e) {
+    try { const s=localStorage.getItem('gosu_memo'); if(s) MEMO={...DEFAULT_MEMO,...JSON.parse(s)}; } catch{}
+  }
+
+  applyCfgToForm();
+  applyMemoToForm();
+
+  // 3. 데이터 로드 (GAS getData → 실패시 gviz)
+  try {
+    const r = await gasGet('getData');
+    if (r.ok && r.rows && r.rows.length > 0) {
+      ALL_DATA = sort(r.rows);
+      setStatus('live', `구글 시트 연동 · 최신: ${ALL_DATA[ALL_DATA.length-1].date} · ${ALL_DATA.length}일`);
+    } else throw new Error('empty');
+  } catch(e) {
+    // gviz 폴백
+    try {
+      const url = `https://docs.google.com/spreadsheets/d/${CFG.sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(CFG.sheetName)}`;
+      const res = await fetch(url);
+      const text = await res.text();
+      const json = JSON.parse(text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1]);
+      const rows = (json.table.rows||[]).map(r => {
+        const get = i => r.c[i]?.v ?? null;
+        const v0 = get(0);
+        let date = '';
+        if (typeof v0 === 'string' && v0.startsWith('Date(')) {
+          const p = v0.replace('Date(','').replace(')','').split(',');
+          date = `${p[0]}-${String(+p[1]+1).padStart(2,'0')}-${String(+p[2]).padStart(2,'0')}`;
+        } else if (v0) { date = String(v0).slice(0,10); }
+        const g = num(get(3));
+        if (!date || !g) return null;
+        return { date, dow:get(1)||'', bcast:get(2)||'방송없음',
+          g, gin:num(get(4)), gout:num(get(5)),
+          ktF:num(get(6)), ktV:num(get(7)),
+          yt:num(get(8)), tt:num(get(9)), ntv:num(get(10)),
+          asia:num(get(11)), news:num(get(12)), etoday:num(get(13)) };
+      }).filter(r => r && r.date && r.g > 0);
+      if (rows.length > 0) {
+        ALL_DATA = sort(rows);
+        setStatus('live', `구글 시트 연동 · 최신: ${ALL_DATA[ALL_DATA.length-1].date} · ${ALL_DATA.length}일`);
+      } else throw new Error('no data');
+    } catch(e2) {
+      setStatus('warn', '구글 시트 연동 불가 — 데이터 없음');
+    }
+  }
+
+  // 주차 초기화 (이번 주)
+  currentWeekStart = getMondayOf(new Date());
+  updateWeekNav();
+
+  $('loadingState').style.display = 'none';
+  $('mainBody').style.display = 'block';
+  renderDashboard();
+
+  // 5분마다 자동 갱신
+  setInterval(async () => {
+    try {
+      const r = await gasGet('getData');
+      if (r.ok && r.rows && r.rows.length > 0) {
+        ALL_DATA = sort(r.rows);
+        renderDashboard();
+        setStatus('live', `구글 시트 연동 · 최신: ${ALL_DATA[ALL_DATA.length-1].date}`);
+      }
+    } catch(e) {}
+  }, 5*60*1000);
+}
+
+// ── 관리자 ────────────────────────────────────────────────────────
+$('mainTitle').addEventListener('click', () => {
+  tapCount++;
+  const hint=$('tapHint'), rem=5-tapCount;
+  if (rem > 0) {
+    hint.textContent=`${rem}번 더 탭하면 관리자 모드`;
+    hint.classList.add('show');
+    clearTimeout(tapTimer);
+    tapTimer = setTimeout(()=>{ tapCount=0; hint.classList.remove('show'); }, 2000);
+  } else {
+    tapCount=0; hint.classList.remove('show');
+    $('adminFab').classList.add('visible');
+    showFlash('⚙️ 관리자 모드 활성화','ok');
+  }
+});
+
+function openAdmin() { $('adminOverlay').classList.add('open'); renderList(); applyMemoToForm(); }
+function closeAdmin() { $('adminOverlay').classList.remove('open'); }
+function overlayClick(e) { if(e.target===$('adminOverlay')) closeAdmin(); }
+function switchTab(t) {
+  ['input','list','memo','settings'].forEach((n,i) => {
+    document.querySelectorAll('.atab')[i].classList.toggle('active',n===t);
+    $('tab-'+n).classList.toggle('active',n===t);
+  });
+  if(t==='list') renderList();
+  if(t==='memo') applyMemoToForm();
+}
+
+function setToday() {
+  const now=new Date();
+  $('f_date').value=now.toISOString().slice(0,10);
+  $('f_dow').value=['일','월','화','수','목','금','토'][now.getDay()];
+}
+function clearForm() {
+  ['f_g','f_gin','f_gout','f_kt','f_ktv','f_yt','f_tt','f_ntv','f_asia','f_news','f_etoday'].forEach(id=>$(id).value='');
+  $('f_bcast').value='방송없음'; setToday();
+}
+function loadEditForm(date) {
+  const r=ALL_DATA.find(d=>d.date===date); if(!r) return;
+  editDate=date;
+  $('f_date').value=r.date; $('f_dow').value=r.dow; $('f_bcast').value=r.bcast;
+  $('f_g').value=r.g||''; $('f_gin').value=r.gin||''; $('f_gout').value=r.gout||'';
+  $('f_kt').value=r.ktF||''; $('f_ktv').value=r.ktV||'';
+  $('f_yt').value=r.yt||''; $('f_tt').value=r.tt||''; $('f_ntv').value=r.ntv||'';
+  $('f_asia').value=r.asia||''; $('f_news').value=r.news||''; $('f_etoday').value=r.etoday||'';
+  $('editBannerText').textContent=`✏️ ${date} 수정 중`;
+  $('editBanner').classList.add('show'); switchTab('input');
+}
+function cancelEdit() { editDate=null; $('editBanner').classList.remove('show'); clearForm(); }
+
+function saveRow() {
+  const date=$('f_date').value; if(!date){showFlash('날짜를 입력하세요','err');return;}
+  const g=num($('f_g').value); if(!g){showFlash('텔레그램 구독자를 입력하세요','err');return;}
+  const row={date,dow:$('f_dow').value,bcast:$('f_bcast').value,
+    g,gin:num($('f_gin').value),gout:num($('f_gout').value),
+    ktF:num($('f_kt').value),ktV:num($('f_ktv').value),
+    yt:num($('f_yt').value),tt:num($('f_tt').value),ntv:num($('f_ntv').value),
+    asia:num($('f_asia').value),news:num($('f_news').value),etoday:num($('f_etoday').value)};
+  const idx=ALL_DATA.findIndex(r=>r.date===date);
+  if(idx>=0) ALL_DATA[idx]=row; else ALL_DATA.push(row);
+  ALL_DATA=sort(ALL_DATA);
+  gasPost({action:'upsert',row});
+  showFlash(editDate?'✓ 수정 완료 · 구글 시트 반영 중':'✓ 저장 완료 · 구글 시트 반영 중','ok');
+  cancelEdit(); renderDashboard(); renderList();
+}
+function deleteRow(date) {
+  if(!confirm(`${date} 데이터를 삭제할까요?`)) return;
+  ALL_DATA=ALL_DATA.filter(r=>r.date!==date);
+  gasPost({action:'delete',date});
+  showFlash('✓ 삭제 완료','ok'); renderDashboard(); renderList();
+}
+
+function renderList() {
+  const el=$('dataList');
+  if(!ALL_DATA.length){el.innerHTML='<div style="text-align:center;padding:20px;color:#ADB5BD">데이터 없음</div>';return;}
+  el.innerHTML=[...ALL_DATA].reverse().map(r=>{
+    const net=r.gin-r.gout;
+    return`<div class="data-item"><div class="di-header"><div><span class="di-date">${r.date}</span><span style="font-size:11px;color:#ADB5BD;margin-left:6px">${r.dow}요일</span></div><div class="di-btns"><button onclick="loadEditForm('${r.date}')" style="background:#EBF3FE;color:#3182F6">수정</button><button onclick="deleteRow('${r.date}')" style="background:#FEECEE;color:#F04452">삭제</button></div></div><div class="di-grid"><div><div class="dc-l">텔레그램</div><div class="dc-v">${r.g.toLocaleString()}</div></div><div><div class="dc-l">순증</div><div class="dc-v" style="color:${net>=0?'#00B493':'#F04452'}">${net>=0?'+':''}${net}</div></div><div><div class="dc-l">카톡</div><div class="dc-v" style="color:#F5A623">${r.ktF.toLocaleString()}</div></div><div><div class="dc-l">광고유입</div><div class="dc-v" style="color:#8B5CF6">${(r.asia+r.news+r.etoday).toLocaleString()}</div></div></div></div>`;
+  }).join('');
+}
+
+function applyMemoToForm() { $('m_sns').value=MEMO.sns; $('m_video').value=MEMO.video; $('m_info').value=MEMO.info; }
+function saveMemo() {
+  MEMO.sns=$('m_sns').value.trim();
+  MEMO.video=$('m_video').value.trim();
+  MEMO.info=$('m_info').value.trim();
+  localStorage.setItem('gosu_memo', JSON.stringify(MEMO)); // 로컬 캐시
+  gasPost({action:'saveMemo', memo:MEMO}); // GAS → 구글 시트
+  renderMemo();
+  showFlash('✓ 비고 저장 완료 · 구글 시트에 반영 중','ok');
+}
+function renderMemo() {
+  ['sns','video','info'].forEach(k=>{
+    const el=$(`memo-${k}`);
+    if(MEMO[k]){ el.textContent=MEMO[k]; el.style.color='#191F28'; }
+    else { el.innerHTML='<span class="memo-empty">비고 없음</span>'; }
+  });
+}
+
+function applyCfgToForm() {
+  $('s_channel').value=CFG.channel; $('s_program').value=CFG.program;
+  $('s_freq').value=CFG.freq; $('s_main').value=CFG.mainDay; $('s_rerun').value=CFG.rerunDay;
+  $('s_launch').value=CFG.launch; $('s_sheetId').value=CFG.sheetId;
+  $('s_sheetName').value=CFG.sheetName; $('s_gasUrl').value=CFG.gasUrl;
+}
+function saveSettings() {
+  CFG.channel=$('s_channel').value.trim(); CFG.program=$('s_program').value.trim();
+  CFG.freq=$('s_freq').value.trim(); CFG.mainDay=$('s_main').value.trim();
+  CFG.rerunDay=$('s_rerun').value.trim(); CFG.launch=$('s_launch').value;
+  CFG.sheetId=$('s_sheetId').value.trim(); CFG.sheetName=$('s_sheetName').value.trim();
+  CFG.gasUrl=$('s_gasUrl').value.trim();
+  localStorage.setItem('gosu_cfg', JSON.stringify(CFG));
+  gasPost({action:'saveSettings', cfg:CFG});
+  applyCfgToForm(); renderDashboard();
+  showFlash('✓ 설정 저장 완료','ok');
+}
+function resetData() {
+  if(!confirm('로컬 캐시를 초기화할까요?\n구글 시트 데이터는 유지됩니다.')) return;
+  localStorage.clear();
+  showFlash('✓ 초기화 완료 · 새로고침하세요','ok');
+}
+
+// ── 대시보드 렌더 ─────────────────────────────────────────────────
+const GR='#F0F2F5', TK='#ADB5BD';
+function db(v) {
+  if(v>0) return`<span class="db db-up">▲ +${v.toLocaleString()}</span>`;
+  if(v<0) return`<span class="db db-dn">▼ ${v.toLocaleString()}</span>`;
+  return`<span class="db db-neu">─ 0</span>`;
+}
+
+function renderDashboard() {
+  const w7 = getWeekData(currentWeekStart);
+  const period = `${toYMD(currentWeekStart)} ~ ${toYMD(addDays(currentWeekStart,6))}`;
+
+  // 기간 표시
+  ['sns-period','video-period','info-period'].forEach(id => { if($(id)) $(id).textContent = period; });
+
+  if (!w7.length) {
+    // 데이터 없는 주
+    ['kt-val','tg-val','yt-val','tt-val','ntv-val'].forEach(id=>{ if($(id)) $(id).textContent='—'; });
+    ['kt-net','kt-avg','tg-net','tg-churn','yt-net','tt-net','ntv-net'].forEach(id=>{ if($(id)) $(id).innerHTML='<span class="db db-neu">데이터 없음</span>'; });
+    if($('infoRows')) $('infoRows').innerHTML='<div style="padding:20px;text-align:center;color:#ADB5BD;font-size:13px">해당 주 데이터가 없습니다</div>';
+    renderMemo();
+    return;
+  }
+
+  const last = w7[w7.length-1];
+  const first = w7[0];
+
+  // SNS
+  const ktNet = last.ktF - (first.ktF||0);
+  const ktDays = Math.max(w7.filter(r=>r.ktF>0).length-1, 1);
+  const ktAvg = Math.round(ktNet/ktDays);
+  if($('kt-val')) $('kt-val').textContent = last.ktF.toLocaleString();
+  if($('kt-net')) $('kt-net').innerHTML = db(ktNet);
+  if($('kt-avg')) $('kt-avg').textContent = (ktAvg>=0?'+':'')+ktAvg+'명/일';
+
+  const tgNet = w7.reduce((s,r)=>s+r.gin-r.gout,0);
+  const tIn = w7.reduce((s,r)=>s+r.gin,0), tOut = w7.reduce((s,r)=>s+r.gout,0);
+  const churn = tIn>0?(tOut/tIn*100).toFixed(1):'0.0';
+  if($('tg-val')) $('tg-val').textContent = last.g.toLocaleString();
+  if($('tg-net')) $('tg-net').innerHTML = db(tgNet);
+  if($('tg-churn')) $('tg-churn').textContent = churn+'%';
+
+  // SNS 차트
+  const lb = w7.map(r=>r.date.slice(5)+'('+r.dow+')');
+  if(cSns) cSns.destroy();
+  cSns = new Chart($('chartSns'), {type:'line', data:{labels:lb, datasets:[
+    {label:'카카오',data:w7.map(r=>r.ktF),borderColor:'#F5A623',backgroundColor:'rgba(245,166,35,.08)',tension:.3,pointRadius:4,pointBackgroundColor:'#F5A623',borderWidth:2.5,fill:true,yAxisID:'yA'},
+    {label:'텔레그램',data:w7.map(r=>r.g),borderColor:'#3182F6',backgroundColor:'rgba(49,130,246,.08)',tension:.3,pointRadius:4,pointBackgroundColor:'#3182F6',borderWidth:2.5,fill:true,yAxisID:'yB'},
+  ]}, options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{position:'bottom',labels:{color:TK,font:{size:11},boxWidth:12,padding:10}},tooltip:{mode:'index',intersect:false,callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.parsed.y.toLocaleString()+'명'}}},
+    scales:{yA:{position:'left',ticks:{color:'#F5A623',font:{size:9}},grid:{color:GR},border:{color:GR}},
+            yB:{position:'right',ticks:{color:'#3182F6',font:{size:9}},grid:{display:false},border:{color:GR}},
+            x:{ticks:{color:TK,font:{size:9}},grid:{color:GR},border:{color:GR}}}}
+  });
+
+  // 영상
+  const ytN=last.yt-(first.yt||0), ttN=last.tt-(first.tt||0), ntvN=last.ntv-(first.ntv||0);
+  if($('yt-val')) $('yt-val').textContent = last.yt?last.yt.toLocaleString():'—';
+  if($('tt-val')) $('tt-val').textContent = last.tt?last.tt.toLocaleString():'—';
+  if($('ntv-val')) $('ntv-val').textContent = last.ntv?last.ntv.toLocaleString():'—';
+  if($('yt-net')) $('yt-net').innerHTML = db(ytN);
+  if($('tt-net')) $('tt-net').innerHTML = db(ttN);
+  if($('ntv-net')) $('ntv-net').innerHTML = db(ntvN);
+
+  if(cVideo) cVideo.destroy();
+  const hasV = w7.some(r=>r.yt>0||r.tt>0||r.ntv>0);
+  if(hasV) {
+    cVideo = new Chart($('chartVideo'), {type:'line', data:{labels:lb, datasets:[
+      {label:'유튜브',data:w7.map(r=>r.yt),borderColor:'#FF0000',tension:.3,pointRadius:3,borderWidth:2,fill:false},
+      {label:'틱톡',data:w7.map(r=>r.tt),borderColor:'#555',tension:.3,pointRadius:3,borderWidth:2,fill:false},
+      {label:'네이버TV',data:w7.map(r=>r.ntv),borderColor:'#00C73C',tension:.3,pointRadius:3,borderWidth:2,fill:false},
+    ]}, options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom',labels:{color:TK,font:{size:11},boxWidth:12,padding:10}},tooltip:{mode:'index',intersect:false,callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.parsed.y.toLocaleString()+'명'}}},
+      scales:{x:{ticks:{color:TK,font:{size:9}},grid:{color:GR},border:{color:GR}},y:{ticks:{color:TK,font:{size:9},callback:v=>v.toLocaleString()},grid:{color:GR},border:{color:GR}}}}
+    });
+  }
+
+  // 인포머셜
+  const infos = [
+    {name:'아시아경제',color:'#3182F6',total:w7.reduce((s,r)=>s+r.asia,0),vals:w7.map(r=>r.asia)},
+    {name:'뉴스핌',color:'#00B493',total:w7.reduce((s,r)=>s+r.news,0),vals:w7.map(r=>r.news)},
+    {name:'이투데이',color:'#8B5CF6',total:w7.reduce((s,r)=>s+r.etoday,0),vals:w7.map(r=>r.etoday)},
+  ];
+  const iMax = Math.max(...infos.map(i=>i.total),1);
+  if($('infoRows')) $('infoRows').innerHTML = infos.map(i=>`
+    <div class="info-row">
+      <div class="info-name">${i.name}</div>
+      <div class="info-bar-wrap"><div class="info-bar" style="width:${Math.round(i.total/iMax*100)}%;background:${i.color}"></div></div>
+      <div class="info-right"><div class="info-val" style="color:${i.color}">${i.total?i.total.toLocaleString():'-'}</div><div class="info-delta">주간 누계</div></div>
+    </div>`).join('');
+
+  if(cInfo) cInfo.destroy();
+  const hasI = w7.some(r=>r.asia>0||r.news>0||r.etoday>0);
+  if(hasI) {
+    cInfo = new Chart($('chartInfo'), {type:'bar', data:{labels:lb, datasets:[
+      {label:'아시아경제',data:w7.map(r=>r.asia),backgroundColor:'rgba(49,130,246,.8)',borderRadius:4},
+      {label:'뉴스핌',data:w7.map(r=>r.news),backgroundColor:'rgba(0,180,147,.8)',borderRadius:4},
+      {label:'이투데이',data:w7.map(r=>r.etoday),backgroundColor:'rgba(139,92,246,.8)',borderRadius:4},
+    ]}, options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom',labels:{color:TK,font:{size:11},boxWidth:12,padding:10}},tooltip:{mode:'index',intersect:false}},
+      scales:{x:{stacked:true,ticks:{color:TK,font:{size:9}},grid:{display:false},border:{color:GR}},y:{stacked:true,ticks:{color:TK,font:{size:9}},grid:{color:GR},border:{color:GR}}}}
+    });
+  }
+
+  renderMemo();
+}
+
+setToday();
+init();
+</script>
+</body>
+</html>
